@@ -21,7 +21,7 @@ async def create_pool(loop, **kw):
         port=kw.get('port', 3306),
         user=kw['user'],
         password=kw['password'],
-        db=kw['db'],
+        db=kw['database'],
         charset=kw.get('charset', 'utf8'),
         autocommit=kw.get('autocommit', True),
         maxsize=kw.get('maxsize', 10),
@@ -44,7 +44,7 @@ async def select(sql, args, size=None):
         logging.info('rows returned: %s' % len(rs))
         return rs
 
-async def execute(sql, args):
+async def execute(sql, args, autocommit=True):
     log(sql)
     async with __pool.get() as conn:
         if not autocommit:
@@ -52,7 +52,7 @@ async def execute(sql, args):
         try:
             async with conn.cursor(aiomysql.DictCursor) as cur:
                 await cur.execute(sql.replace('?', '%s'), args)
-                affected = cur.rowcount()
+                affected = cur.rowcount
             if not autocommit:
                 await conn.commit()
         except BaseException as e:
@@ -96,7 +96,7 @@ class ModelMetaclass(type):
         attrs['__fields__'] = fields
 
         attrs['__select__'] = 'select `%s`, %s from `%s`' % (primaryKey, ', '.join(escaped_fields), tableName)
-        attrs['__insert__'] = 'insert into `%s` (%s, ``%s) values (%s)' % (tableName, ', '.join(escaped_fields), primaryKey, create_args_string(len(escaped_fields) + 1))
+        attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (tableName, ', '.join(escaped_fields), primaryKey, create_args_string(len(escaped_fields) + 1))
         attrs['__update__'] = 'update `%s` set %s where `%s`=?' % (tableName, ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)), primaryKey)
         attrs['__delete__'] = 'delete from `%s` where `%s`=?' % (tableName, primaryKey)
         return type.__new__(cls, name, bases, attrs)
@@ -111,7 +111,7 @@ class Model(dict, metaclass=ModelMetaclass):
         try:
             return self[key]
         except KeyError:
-            raise AttributeError(r"'Model' object has no attribute '%'s" % key)
+            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -119,7 +119,7 @@ class Model(dict, metaclass=ModelMetaclass):
     def getValue(self, key):
         return getattr(self, key, None)
 
-    def getValueOrdefault(self):
+    def getValueOrdefault(self, key):
         value = getattr(self, key, None)
         if value is None:
             field = self.__mappings__[key]
@@ -225,4 +225,9 @@ class IntegerField(Field):
 class TextField(Field):
     """docstring for TextField"""
     def __init__(self, name=None, default=None):
-        super().__init__(name, 'text', primary_key, default)
+        super().__init__(name, 'text', False, default)
+
+
+class FloatField(Field):
+    def __init__(self, name=None, primary_key=False, default=0.0):
+        super().__init__(name, 'real', primary_key, default)
