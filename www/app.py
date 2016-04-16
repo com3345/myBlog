@@ -12,6 +12,8 @@ from coroweb import add_routes, add_static
 from jinja2 import Environment, FileSystemLoader
 from aiohttp import web
 
+from handlers import cookie2user, COOKIE_NAME
+
 
 def init_jinja2(app, **kw):
     logging.info('init jinja2...')
@@ -38,7 +40,7 @@ def init_jinja2(app, **kw):
 
 async def logger_factory(app, handler):
     async def logger(request):
-        logging.info('Request : %s, %s' % (request.method, request.path))
+        logging.info('Request : %s %s' % (request.method, request.path))
         return await handler(request)
     return logger
 
@@ -97,24 +99,26 @@ async def response_factory(app, handler):
             t, m = r
             if isinstance(t, int) and t >= 100 and t < 600:
                 return web.Response(t, str(m))
-        resp.web.Response(body=str(r).encode('utf-8'))
+        resp = web.Response(body=str(r).encode('utf-8'))
         resp.content_type = 'text/plain;charset=utf-8'
         return resp
     return response
-# async def auth_factory(app, handler):
-#     async def auth(request):
-#         logging.info('check user: %s %s' % (request.method, request.path))
-#         request.__user__ = None
-#         cookie_str = request.cookies.get(COOKIE_NAME)
-#         if cookie_str:
-#             user = await cookie2user(cookie_str)
-#             if user:
-#                 logging.info('set current user: %s' % user.email)
-#                 request.__user__ = user
-#         if request.path.startswith('/manage/') and (request.__user__ is None or request.__user__admin):
-#             return web.HTTPFound('/signin')
-#         return await handler(request)
-#     return auth
+
+
+async def auth_factory(app, handler):
+    async def auth(request):
+        logging.info('check user: %s %s' % (request.method, request.path))
+        request.__user__ = None
+        cookie_str = request.cookies.get(COOKIE_NAME)
+        if cookie_str:
+            user = await cookie2user(cookie_str)
+            if user:
+                logging.info('set current user: %s' % user.email)
+                request.__user__ = user
+        if request.path.startswith('/manage/') and (request.__user__ is None or request.__user__.admin):
+            return web.HTTPFound('/signin')
+        return await handler(request)
+    return auth
 
 
 def datetime_filter(t):
@@ -132,14 +136,15 @@ def datetime_filter(t):
 
 
 async def init(loop):
-    await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='root', password='', db='myBlog')
+    await orm.create_pool(loop=loop, user='root', password='', db='myBlog')
     app = web.Application(loop=loop, middlewares=[
-        logger_factory, response_factory
+        logger_factory, auth_factory, response_factory
     ])
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'handlers')
     add_static(app)
-    srv = await loop.create_pool(app.make_handler(), '127.0.0.1', 9000)
+    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
+    logging.info('server started at http://127.0.0.1:9000')
     return srv
 
 loop = asyncio.get_event_loop()

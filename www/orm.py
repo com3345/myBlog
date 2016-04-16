@@ -21,7 +21,7 @@ async def create_pool(loop, **kw):
         port=kw.get('port', 3306),
         user=kw['user'],
         password=kw['password'],
-        db=kw['database'],
+        db=kw['db'],
         charset=kw.get('charset', 'utf8'),
         autocommit=kw.get('autocommit', True),
         maxsize=kw.get('maxsize', 10),
@@ -34,7 +34,7 @@ async def select(sql, args, size=None):
     log(sql, args)
     global __pool
     async with __pool.get() as conn:
-        async with conn.cursor(aiomyasl.DictCursor) as cur:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
             await cur.execute(sql.replace('?', '%s'), args or ())
             if size:
                 rs = await cur.fetchmany(size)
@@ -139,7 +139,7 @@ class Model(dict, metaclass=ModelMetaclass):
             args = []
         orderBy = kw.get('orderBy', None)
         if orderBy:
-            sql.append('orderBy')
+            sql.append('order By')
             sql.append(orderBy)
         limit = kw.get('limit', None)
         if limit is not None:
@@ -212,7 +212,7 @@ class StringField(Field):
 
 
 class BooleanField(Field):
-    def __init__(self, name=None, default=None):
+    def __init__(self, name=None, default=False):
         super().__init__(name, 'boolean', False, default)
 
 

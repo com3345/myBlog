@@ -2,6 +2,7 @@ import functools
 import asyncio
 import inspect
 import logging
+import os
 from urllib import parse
 from aiohttp import web
 from apis import APIError
@@ -57,7 +58,7 @@ def post(path):
 def get_required_kw_args(fn):
     args = []
     params = inspect.signature(fn).parameters
-    for name, param in param.items():
+    for name, param in params.items():
         if param.kind == inspect.Parameter.KEYWORD_ONLY and param.default == inspect.Parameter.empty:
             args.append(name)
     return tuple(args)
@@ -68,7 +69,7 @@ def get_required_kw_args(fn):
 def get_named_kw_args(fn):
     args = []
     params = inspect.signature(fn).parameters
-    for name, param in param.items():
+    for name, param in params.items():
         if param.kind == inspect.Parameter.KEYWORD_ONLY:
             args.append(name)
     return tuple(args)
@@ -103,7 +104,7 @@ def has_request_arg(fn):
 
 class RequestHandler(object):
     """docstring for RequestHandler"""
-    def __init__(self, arg):
+    def __init__(self, app, fn):
         self._app = app
         self._func = fn
         # 检测handler函数的参数类型
@@ -165,7 +166,7 @@ class RequestHandler(object):
                     return web.HTTPBadRequest('Missing argument: %s' % name)
         logging.info('call with args: %s' % str(kw))
         try:
-            r = await self._func(**kw)
+            return await self._func(**kw)
         except APIError as e:
             return dict(error=e.error, data=e.data, message=e.message)
 
