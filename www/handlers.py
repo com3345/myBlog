@@ -246,6 +246,11 @@ async def manage(*, page='1'):
     }
 
 
-@post('/manage/blogs/{id}/delete')
-async def delete_blog():
-    pass
+@post('/api/blogs/{id}/delete')
+async def api_delete_blog(request, *, id):
+    check_admin(request)
+    print('check_admin correct!')
+    blog = await Blog.find(id)
+    print('find blog!')
+    await blog.remove()
+    return dict(id=id)
