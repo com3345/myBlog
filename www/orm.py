@@ -149,6 +149,7 @@ class Model(dict, metaclass=ModelMetaclass):
                 args.append(limit)
             elif isinstance(limit, tuple) and len(limit) == 2:
                 sql.append('?,?')
+                args.extend(limit)
             else:
                 raise ValueError('Invaild limit value: %s' % str(limit))
         rs = await select(' '.join(sql), args)
