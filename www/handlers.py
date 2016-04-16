@@ -244,3 +244,8 @@ async def manage(*, page='1'):
         '__template__': 'manage_blogs.html',
         'page_index': get_page_index(page)
     }
+
+
+@post('/manage/blogs/{id}/delete')
+async def delete_blog():
+    pass
