@@ -117,11 +117,16 @@ async def register():
 
 
 @get('/api/users')
-async def api_get_users():
+async def api_get_users(*, page='1'):
+    page_index = get_page_index(page)
+    num = await User.findNumber('count(id)')
+    p = Page(num, page_index)
+    if num == 0:
+        return dict(page=p, users=())
     users = await User.findAll(orderBy='created_at desc')
     for u in users:
         u.passwd = '*******'
-    return dict(users=users)
+    return dict(page=p, users=users)
 
 
 @post('/api/users')
@@ -329,3 +334,11 @@ async def api_create_comment(id, request, *, content):
     )
     await comment.save()
     return comment
+
+
+@get('/manage/users')
+async def get_users(*, page='1'):
+    return {
+        '__template__': 'manage_users.html',
+        'page_index': get_page_index(page)
+    }
