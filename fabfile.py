@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from fabric.api import *
 
-env.user = 'macuser'
+env.user = 'root'
 env.sudo_user = 'root'
 env.hosts = ['133.130.112.166']
 
@@ -71,8 +71,8 @@ def deploy():
     with cd(_REMOTE_BASE_DIR):
         sudo('rm -rf www')
         sudo('ln -s %s www' % newdir)
-        sudo('chown macuser:macuser www')
-        sudo('chown -R macuser:macuser %s' % newdir)
+        sudo('chown root:root www')
+        sudo('chown -R root:root %s' % newdir)
     with settings(warn_only=True):
         sudo('supervisorctl stop myBlog')
         sudo('supervisorctl start myBlog')
@@ -121,7 +121,7 @@ def rollback():
         print ('Start rollback...')
         sudo('rm -f www')
         sudo('ln -s %s www' % old)
-        sudo('chown macuser:macuser www')
+        sudo('chown root:root www')
         with settings(warn_only=True):
             sudo('supervisorctl stop myBlog')
             sudo('supervisorctl start myBlog')
