@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from fabric.api import *
 
-env.user = 'root'
+env.user = 'myblog'
 env.sudo_user = 'root'
 env.hosts = ['133.130.112.166']
 
@@ -51,7 +51,7 @@ def build():
     Build dist package.
     '''
     includes = ['static', 'templates', '*.py']
-    excludes = ['test', '.*', '*.pyc', '*.pyo']
+    excludes = ['test.*', '*.pyc', '*.pyo']
     local('rm -f dist/%s' % _TAR_FILE)
     with lcd(os.path.join(_current_path(), 'www')):
         cmd = ['tar', '--dereference', '-czvf', '../dist/%s' % _TAR_FILE]
@@ -71,8 +71,9 @@ def deploy():
     with cd(_REMOTE_BASE_DIR):
         sudo('rm -rf www')
         sudo('ln -s %s www' % newdir)
-        sudo('chown root:root www')
-        sudo('chown -R root:root %s' % newdir)
+        sudo('chown www-data:www-data www')
+        sudo('chmod 711 www/app.py')
+        sudo('chown -R www-data:www-data %s' % newdir)
     with settings(warn_only=True):
         sudo('supervisorctl stop myBlog')
         sudo('supervisorctl start myBlog')
@@ -121,7 +122,7 @@ def rollback():
         print ('Start rollback...')
         sudo('rm -f www')
         sudo('ln -s %s www' % old)
-        sudo('chown root:root www')
+        sudo('chown -R www-data:www-data www')
         with settings(warn_only=True):
             sudo('supervisorctl stop myBlog')
             sudo('supervisorctl start myBlog')
