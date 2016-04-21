@@ -97,6 +97,11 @@ async def index(*, page='1'):
     }
 
 
+@get('/manage/')
+def manage():
+    return 'redirect:/manage/comments'
+
+
 @get('/signin')
 async def signin():
     return {
@@ -194,8 +199,12 @@ async def get_blog(id):
     blog = await Blog.find(id)
     comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
+        print(c.content)
         c.html_content = markdown(c.content)
+        print(c.html_content)
+    print(blog.content)
     blog.html_content = markdown(blog.content)
+    print(blog.html_content)
     return {
         '__template__': 'blog.html',
         'blog': blog,
@@ -251,7 +260,7 @@ async def api_blogs(*, page='1'):
 
 
 @get('/manage/blogs')
-async def manage(*, page='1'):
+async def manage_blogs(*, page='1'):
     return {
         '__template__': 'manage_blogs.html',
         'page_index': get_page_index(page)
