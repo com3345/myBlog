@@ -81,6 +81,13 @@ async def cookie2user(cookie_str):
         return None
 
 
+@get('/info')
+def infomation():
+    return {
+        '__template__': 'info.html'
+    }
+
+
 @get('/')
 async def index(*, page='1'):
     page_index = get_page_index(page)
