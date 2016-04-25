@@ -72,7 +72,7 @@ def deploy():
         sudo('rm -rf www')
         sudo('ln -s %s www' % newdir)
         sudo('chown www-data:www-data www')
-        sudo('chmod 711 www/app.py')
+        sudo('chmod 700 www/app.py')
         sudo('chown -R www-data:www-data %s' % newdir)
     with settings(warn_only=True):
         sudo('supervisorctl stop myBlog')
