@@ -80,6 +80,13 @@ async def cookie2user(cookie_str):
         logging.exception(e)
         return None
 
+@get('/mecab')
+def infomation():
+    return {
+        '__template__': 'mecab.html'
+    }
+
+
 
 @get('/info')
 def infomation():
