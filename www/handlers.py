@@ -38,14 +38,15 @@ def _not_in_black_list(word):
 
 
 def parse(c):
-    words = []
+    nouns, verbs = set(), set()
     mt = MeCab.Tagger()
     for line in mt.parse(c).splitlines()[:-1]:
-        # print(line)
-        word, attrs = line.split()
-        if attrs[:2] == '名詞' and _not_in_black_list(word):
-            words.append(word)
-    return words
+        word, attrs = line.split()[:2]
+        if attrs[:2] == '名詞' and _not_in_black_list(word) and word not in nouns:
+            nouns.add(word)
+        if attrs[:2] == '動詞' and _not_in_black_list(word) and word not in verbs:
+            verbs.add(word)
+    return list(nouns), list(verbs)
 
 
 def check_admin(request):
@@ -179,8 +180,10 @@ async def api_get_users(*, page='1'):
 def api_parse_text(*, content):
     if not content or not content.strip():
         raise APIValueError('content', 'content cannot be empty.')
-    words = parse(content)
-    return dict(words=words)
+    nouns, verbs = parse(content)
+    result = dict(nouns=nouns, verbs=verbs)
+    print(result)
+    return result
 
 
 @post('/api/users')
