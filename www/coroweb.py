@@ -127,9 +127,11 @@ class RequestHandler(object):
             if request.method == 'POST':
                 if not request.content_type:
                     return web.HTTPBadRequest('Missing Content-Type')
+
                 ct = request.content_type.lower()
                 if ct.startswith('application/json'):
                     params = await request.json()
+                    print(params)
                     if not isinstance(params, dict):
                         return web.HTTPBadRequest('JSON Body must be object')
                     kw = params

@@ -13,8 +13,9 @@ import re
 import json
 import hashlib
 import logging
+import MeCab
 
-
+from stopwords import stopwordslist
 from config import configs
 
 COOKIE_NAME = 'myBlogsession'
@@ -23,6 +24,29 @@ _COOKIE_KEY = configs.session.secret
 
 _RE_EMAIL = re.compile(r'[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
+
+
+def _not_in_black_list(word):
+    n = len(word)
+    if n == 1 and 0x3041 <= ord(word) <= 0x3093:
+        return False
+    if n == 1 and word.isalpha() or word.isdigit():
+        return False
+    if word in stopwordslist:
+        return False
+    return True
+
+
+def parse(c):
+    nouns, verbs = set(), set()
+    mt = MeCab.Tagger()
+    for line in mt.parse(c).splitlines()[:-1]:
+        word, attrs = line.split()[:2]
+        if attrs[:2] == '名詞' and _not_in_black_list(word) and word not in nouns:
+            nouns.add(word)
+        if attrs[:2] == '動詞' and _not_in_black_list(word) and word not in verbs:
+            verbs.add(word)
+    return list(nouns), list(verbs)
 
 
 def check_admin(request):
@@ -81,6 +105,20 @@ async def cookie2user(cookie_str):
         return None
 
 
+@get('/mecab')
+def mecabpage():
+    return {
+        '__template__': 'mecab.html'
+    }
+
+
+@get('/info')
+def information():
+    return {
+        '__template__': 'info.html'
+    }
+
+
 @get('/')
 async def index(*, page='1'):
     page_index = get_page_index(page)
@@ -95,6 +133,11 @@ async def index(*, page='1'):
         'page': page,
         'blogs': blogs
     }
+
+
+@get('/manage/')
+def manage():
+    return 'redirect:/manage/comments'
 
 
 @get('/signin')
@@ -131,6 +174,16 @@ async def api_get_users(*, page='1'):
     for u in users:
         u.passwd = '*******'
     return dict(page=p, users=users)
+
+
+@post('/api/parse')
+def api_parse_text(*, content):
+    if not content or not content.strip():
+        raise APIValueError('content', 'content cannot be empty.')
+    nouns, verbs = parse(content)
+    result = dict(nouns=nouns, verbs=verbs)
+    print(result)
+    return result
 
 
 @post('/api/users')
@@ -194,8 +247,12 @@ async def get_blog(id):
     blog = await Blog.find(id)
     comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
-        c.html_content = text2html(c.content)
+        print(c.content)
+        c.html_content = markdown(c.content)
+        print(c.html_content)
+    print(blog.content)
     blog.html_content = markdown(blog.content)
+    print(blog.html_content)
     return {
         '__template__': 'blog.html',
         'blog': blog,
@@ -251,7 +308,7 @@ async def api_blogs(*, page='1'):
 
 
 @get('/manage/blogs')
-async def manage(*, page='1'):
+async def manage_blogs(*, page='1'):
     return {
         '__template__': 'manage_blogs.html',
         'page_index': get_page_index(page)

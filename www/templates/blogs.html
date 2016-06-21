@@ -11,7 +11,7 @@
 
 {% block content %}
 
-    <div class="uk-width-medium-3-4">
+    <div class="uk-width-medium-5-6">
     {% for blog in blogs %}
         <article class="uk-article">
             <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
@@ -21,14 +21,14 @@
         </article>
         <hr class="uk-article-divider">
     {% endfor %}
-    {{ pagination('/?page=', page) }}
+    ${ pagination('/?page=', page) }
     </div>
 
-    <div class="uk-width-medium-1-4">
+    <div class="uk-width-medium-1-6">
         <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
             <ul class="uk-list uk-list-line">
-                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.plusaber.com">PlusSaber</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.plusaber.net">PlusSaber</a></li>
             </ul>
         </div>
     </div>
