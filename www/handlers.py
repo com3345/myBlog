@@ -13,8 +13,9 @@ import re
 import json
 import hashlib
 import logging
+import MeCab
 
-
+from stopwords import stopwordslist
 from config import configs
 
 COOKIE_NAME = 'myBlogsession'
@@ -23,6 +24,28 @@ _COOKIE_KEY = configs.session.secret
 
 _RE_EMAIL = re.compile(r'[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
+
+
+def _not_in_black_list(word):
+    n = len(word)
+    if n == 1 and 0x3041 <= ord(word) <= 0x3093:
+        return False
+    if n == 1 and word.isalpha() or word.isdigit():
+        return False
+    if word in stopwordslist:
+        return False
+    return True
+
+
+def parse(c):
+    words = []
+    mt = MeCab.Tagger()
+    for line in mt.parse(c).splitlines()[:-1]:
+        # print(line)
+        word, attrs = line.split()
+        if attrs[:2] == '名詞' and _not_in_black_list(word):
+            words.append(word)
+    return words
 
 
 def check_admin(request):
@@ -80,16 +103,16 @@ async def cookie2user(cookie_str):
         logging.exception(e)
         return None
 
+
 @get('/mecab')
-def infomation():
+def mecabpage():
     return {
         '__template__': 'mecab.html'
     }
 
 
-
 @get('/info')
-def infomation():
+def information():
     return {
         '__template__': 'info.html'
     }
@@ -150,6 +173,14 @@ async def api_get_users(*, page='1'):
     for u in users:
         u.passwd = '*******'
     return dict(page=p, users=users)
+
+
+@post('/api/parse')
+def api_parse_text(*, content):
+    if not content or not content.strip():
+        raise APIValueError('content', 'content cannot be empty.')
+    words = parse(content)
+    return dict(words=words)
 
 
 @post('/api/users')
