@@ -12,7 +12,7 @@
 
 
 $(function() {
-    Vue.config.delimiters = ['${', '}'];
+    // Vue.config.delimiters = ['${', '}'];
     // $("#clean-buttton").hide();
     $("#vm2").hide();
     var vm = new Vue({
@@ -24,7 +24,7 @@ $(function() {
         
         methods: {
             submit: function(event) {
-                event.preventDefault();
+                // event.preventDefault();
                 var
                     $form = $('#vm'),
                     content = this.content.trim();
@@ -36,13 +36,7 @@ $(function() {
                         $form.showFormError(err);
                     }
                     else {
-                        // vm.result = result.words
-                        // alert(result.nouns)
-                        // alert(result.verbs)
-                        // $("#submit-button").hide();
-                        // $("#clean-buttton").show();
                         vm.submitted = true;
-                        alert("tijiao")
                         initVM2(result);
 
                     }
@@ -78,7 +72,7 @@ function initVM2(result) {
 
 
     <div class="uk-width-1-2">
-        <form id="vm" @submit.prevent class="uk-form uk-form-stacked">
+        <form id="vm" @submit.prevent="submit" class="uk-form uk-form-stacked">
             <div class="uk-alert uk-alert-danger uk-hidden"></div>
             <div class="uk-form-row">
                 <h3>Input:</h3>

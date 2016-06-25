@@ -365,11 +365,11 @@ if (typeof(Vue)!=='undefined') {
         //         '<li v-if="has_next"><a v-attr="onclick:\'gotoPage(\' + (page_index+1) + \')\'" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>' +
         //     '</ul>'
         template: '<ul class="uk-pagination">' +
-                '<li v-if="! has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>' +
-                '<li v-if="has_previous"><a :onclick="\'gotoPage(\' + (page_index-1) + \')\'" href="#0"><i class="uk-icon-angle-double-left"></i></a></li>' +
-                '<li class="uk-active"><span v-text="page_index"></span></li>' +
-                '<li v-if="! has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>' +
-                '<li v-if="has_next"><a :onclick="\'gotoPage(\' + (page_index+1) + \')\'" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>' +
+                '<li v-if="! page.has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>' +
+                '<li v-if="page.has_previous"><a :onclick="\'gotoPage(\' + (page.page_index-1) + \')\'" href="#0"><i class="uk-icon-angle-double-left"></i></a></li>' +
+                '<li class="uk-active"><span v-text="page.page_index"></span></li>' +
+                '<li v-if="! page.has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>' +
+                '<li v-if="page.has_next"><a :onclick="\'gotoPage(\' + (page.page_index+1) + \')\'" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>' +
             '</ul>'
     });
 }
