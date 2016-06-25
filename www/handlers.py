@@ -178,8 +178,12 @@ async def api_get_users(*, page='1'):
 
 @post('/api/parse')
 def api_parse_text(*, content):
-    if not content or not content.strip():
+    content = content.strip()
+    if not content:
         raise APIValueError('content', 'content cannot be empty.')
+    if len(content) > 1000:
+        raise APIValueError('content', 'too many words > 1000')
+
     nouns, verbs = parse(content)
     result = dict(nouns=nouns, verbs=verbs)
     print(result)

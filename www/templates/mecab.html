@@ -14,13 +14,20 @@ $(function() {
             '<h4>Verbs</h4> <p v-text="result.verbs"></p></div>'
     });
 
-    $("#vm2").hide();
     var vm = new Vue({
         el: '#vm',
         data: {
             content: '',
             submitted: false,
             result: ''
+        },
+        computed:{
+            color: function () {
+                if (this.content.length > 1000)
+                    return 'red';
+                else
+                    return 'black'
+            }
         },
         methods: {
             submit: function(event) {
@@ -69,6 +76,7 @@ $(function() {
                 <div class="uk-form-row">
                     <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
                     <a v-if="submitted" @click="clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
+                    <span v-if="!submitted"> Words count: <span :style="{color: color}" v-text="content.trim().length"></span>/1000</span>
                 </div>
             </form>
         </div>
