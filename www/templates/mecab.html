@@ -4,14 +4,15 @@
 
 {% block beforehead %}
 
-{% endblock %}
-
-{% block content %}
-
 <script>
-
-
 $(function() {
+    Vue.component('showresult', {
+        props: ['result'],
+        template:  '<div class="uk-width-1-2">' + 
+                    '<h3>Output:</h3>' + 
+            '<div><h4>Nouns</h4> <p v-text="result.nouns"></p>' + 
+            '<h4>Verbs</h4> <p v-text="result.verbs"></p></div>'
+    });
 
     $("#vm2").hide();
     var vm = new Vue({
@@ -21,11 +22,10 @@ $(function() {
             submitted: false,
             result: ''
         },
-        
         methods: {
             submit: function(event) {
                 var
-                    $form = $('#vm'),
+                    $form = $('#vm').find('form'),
                     content = this.content.trim();
 
                 $form.postJSON('/api/parse', {
@@ -36,59 +36,47 @@ $(function() {
                     }
                     else {
                         vm.submitted = true;
-                        initVM2(result);
-
+                        alert(result.nouns);
+                        vm.result = result;
                     }
                 });
             },
             clean: function(){
                 vm.submitted = false;
                 vm.content = '';
-                vm2.$destroy();
+                vm.result = ''
             }
         }
     });
 });
-
-function initVM2(result) {
-    var vm2 = new Vue({
-        el: '#vm2',
-        data: {
-            nouns: result.nouns,
-            verbs: result.verbs,
-        }   
-    });
-    $('#vm2').show();
-}
-
 </script>
 
-    <div id="error" class="uk-width-1-1"></div>
+{% endblock %}
 
-    <div class="uk-width-1-2">
-        <form id="vm" @submit.prevent="submit" class="uk-form uk-form-stacked">
-            <div class="uk-alert uk-alert-danger uk-hidden"></div>
-            <div class="uk-form-row">
-                <h3>Input:</h3>
-                <div class="uk-form-controls">
-                    <textarea id="editor" v-model="content" rows="16" name="content" placeholder="请输入一段文字" class="uk-width-1-1" style="resize:none;"></textarea>
+{% block container %}
+<div id="vm" class="uk-container uk-container-center">
+    <div class="uk-grid">
+{% block content %}
+        <div id="error" class="uk-width-1-1"></div>
+        <div class="uk-width-1-2">
+            <form @submit.prevent="submit" class="uk-form uk-form-stacked">
+                <div class="uk-alert uk-alert-danger uk-hidden"></div>
+                <div class="uk-form-row">
+                    <h3>Input:</h3>
+                    <div class="uk-form-controls">
+                        <textarea id="editor" v-model="content" rows="16" name="content" placeholder="请输入一段文字" class="uk-width-1-1" style="resize:none;"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="uk-form-row">
-                <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
-                <a v-if="submitted" @click="clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
-
-            </div>
-
-        </form>
-    </div>
-    <div class="uk-width-1-2">
-        <h3>Output:</h3>
-        <div id='vm2'>
-            <h4>Nouns</h4> <p v-text="nouns"></p>
-            <h4>Verbs</h4> <p v-text="verbs"></p>
+                <div class="uk-form-row">
+                    <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
+                    <a v-if="submitted" @click="clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
+                </div>
+            </form>
         </div>
-
+        <showresult v-if="submitted" :result='result'></showresult>
     </div>
+</div>
 
 {% endblock %}
+{% endblock %}
+
