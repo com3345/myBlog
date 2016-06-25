@@ -68,7 +68,6 @@ $(function() {
                         <span v-if="user.admin" style="color:#d05"><i class="uk-icon-key"></i> 管理员</span>
                     </td>
                     <td>
-                        <!-- <a v-attr="href: 'mailto:'+user.email" v-text="user.email"></a> -->
                         <a :href="'mailto:' + user.email" v-text="user.email"></a>
                     </td>
                     <td>
@@ -77,7 +76,6 @@ $(function() {
                 </tr>
             </tbody>
         </table>
-        <!-- <div v-component="pagination" v-with="page"></div> -->
         <pagination :page='page'></pagination>
     </div>
 
