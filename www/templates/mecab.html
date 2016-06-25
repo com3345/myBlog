@@ -78,7 +78,7 @@ function initVM2(result) {
 
 
     <div class="uk-width-1-2">
-        <form id="vm" v-on="submit: submit" class="uk-form uk-form-stacked">
+        <form id="vm" @submit.prevent class="uk-form uk-form-stacked">
             <div class="uk-alert uk-alert-danger uk-hidden"></div>
             <div class="uk-form-row">
                 <h3>Input:</h3>
@@ -89,7 +89,7 @@ function initVM2(result) {
             <!-- <div class="uk-form-row"><div id="result"></div></div> -->
             <div class="uk-form-row">
                 <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
-                <a v-if="submitted" v-on="click: clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
+                <a v-if="submitted" @click="clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
 
             </div>
             <!-- <div class="uk-form-row">
