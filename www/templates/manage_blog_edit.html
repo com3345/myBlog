@@ -24,7 +24,6 @@ function initVM(blog) {
         data: blog,
         methods: {
             submit: function (event) {
-                event.preventDefault();
                 var $form = $('#vm').find('form');
                 $form.postJSON(action, this.$data, function (err, r){
                     if (err) {

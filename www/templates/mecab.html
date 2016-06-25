@@ -12,19 +12,18 @@
 
 
 $(function() {
-    // Vue.config.delimiters = ['${', '}'];
-    // $("#clean-buttton").hide();
+
     $("#vm2").hide();
     var vm = new Vue({
         el: '#vm',
         data: {
             content: '',
             submitted: false,
+            result: ''
         },
         
         methods: {
             submit: function(event) {
-                // event.preventDefault();
                 var
                     $form = $('#vm'),
                     content = this.content.trim();
@@ -62,14 +61,9 @@ function initVM2(result) {
     $('#vm2').show();
 }
 
-
-
-
 </script>
 
-
     <div id="error" class="uk-width-1-1"></div>
-
 
     <div class="uk-width-1-2">
         <form id="vm" @submit.prevent="submit" class="uk-form uk-form-stacked">
@@ -80,20 +74,15 @@ function initVM2(result) {
                     <textarea id="editor" v-model="content" rows="16" name="content" placeholder="请输入一段文字" class="uk-width-1-1" style="resize:none;"></textarea>
                 </div>
             </div>
-            <!-- <div class="uk-form-row"><div id="result"></div></div> -->
             <div class="uk-form-row">
                 <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
                 <a v-if="submitted" @click="clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
 
             </div>
-            <!-- <div class="uk-form-row">
-                <p> ${ result }</p>
-            </div> -->
 
         </form>
     </div>
     <div class="uk-width-1-2">
-        <!-- <label class="uk-form-label">Output:</label> -->
         <h3>Output:</h3>
         <div id='vm2'>
             <h4>Nouns</h4> <p v-text="nouns"></p>
