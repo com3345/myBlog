@@ -186,7 +186,7 @@ def api_parse_text(*, content):
 
     nouns, verbs = parse(content)
     result = dict(nouns=nouns, verbs=verbs)
-    print(result)
+
     return result
 
 
@@ -221,7 +221,6 @@ async def api_register_user(*, email, name, passwd):
 
 @post('/api/authenticate')
 async def authenticate(*, email, passwd):
-    print(email, passwd)
     if not email:
         raise APIValueError('email', 'Invalid email.')
     if not passwd:
@@ -251,12 +250,8 @@ async def get_blog(id):
     blog = await Blog.find(id)
     comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
-        print(c.content)
         c.html_content = markdown(c.content)
-        print(c.html_content)
-    print(blog.content)
     blog.html_content = markdown(blog.content)
-    print(blog.html_content)
     return {
         '__template__': 'blog.html',
         'blog': blog,

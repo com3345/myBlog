@@ -126,6 +126,7 @@ async def auth_factory(app, handler):
 
 
 def datetime_filter(t):
+    print('当前时间:{0}'.format(t))
     delta = int(time.time() - t)
     if delta < 60:
         return u'1分钟前'
