@@ -131,7 +131,6 @@ class RequestHandler(object):
                 ct = request.content_type.lower()
                 if ct.startswith('application/json'):
                     params = await request.json()
-                    print(params)
                     if not isinstance(params, dict):
                         return web.HTTPBadRequest('JSON Body must be object')
                     kw = params

@@ -4,29 +4,35 @@
 
 {% block beforehead %}
 
-{% endblock %}
-
-{% block content %}
-
 <script>
-
-
 $(function() {
-    Vue.config.delimiters = ['${', '}'];
-    // $("#clean-buttton").hide();
-    $("#vm2").hide();
+    Vue.component('showresult', {
+        props: ['result'],
+        template:  '<div class="uk-width-1-2">' + 
+                    '<h3>Output:</h3>' + 
+            '<div><h4>Nouns</h4> <p v-text="result.nouns"></p>' + 
+            '<h4>Verbs</h4> <p v-text="result.verbs"></p></div>'
+    });
+
     var vm = new Vue({
         el: '#vm',
         data: {
             content: '',
             submitted: false,
+            result: ''
         },
-        
+        computed:{
+            color: function () {
+                if (this.content.length > 1000)
+                    return 'red';
+                else
+                    return 'black'
+            }
+        },
         methods: {
             submit: function(event) {
-                event.preventDefault();
                 var
-                    $form = $('#vm'),
+                    $form = $('#vm').find('form'),
                     content = this.content.trim();
 
                 $form.postJSON('/api/parse', {
@@ -36,76 +42,47 @@ $(function() {
                         $form.showFormError(err);
                     }
                     else {
-                        // vm.result = result.words
-                        // alert(result.nouns)
-                        // alert(result.verbs)
-                        // $("#submit-button").hide();
-                        // $("#clean-buttton").show();
                         vm.submitted = true;
-                        alert("tijiao")
-                        initVM2(result);
-
+                        vm.result = result;
                     }
                 });
             },
             clean: function(){
                 vm.submitted = false;
                 vm.content = '';
-                vm2.$destroy();
+                vm.result = ''
             }
         }
     });
 });
-
-function initVM2(result) {
-    var vm2 = new Vue({
-        el: '#vm2',
-        data: {
-            nouns: result.nouns,
-            verbs: result.verbs,
-        }   
-    });
-    $('#vm2').show();
-}
-
-
-
-
 </script>
 
+{% endblock %}
 
-    <div id="error" class="uk-width-1-1"></div>
-
-
-    <div class="uk-width-1-2">
-        <form id="vm" v-on="submit: submit" class="uk-form uk-form-stacked">
-            <div class="uk-alert uk-alert-danger uk-hidden"></div>
-            <div class="uk-form-row">
-                <h3>Input:</h3>
-                <div class="uk-form-controls">
-                    <textarea id="editor" v-model="content" rows="16" name="content" placeholder="请输入一段文字" class="uk-width-1-1" style="resize:none;"></textarea>
+{% block container %}
+<div id="vm" class="uk-container uk-container-center">
+    <div class="uk-grid">
+{% block content %}
+        <div id="error" class="uk-width-1-1"></div>
+        <div class="uk-width-1-2">
+            <form @submit.prevent="submit" class="uk-form uk-form-stacked">
+                <div class="uk-alert uk-alert-danger uk-hidden"></div>
+                <div class="uk-form-row">
+                    <h3>Input:</h3>
+                    <div class="uk-form-controls">
+                        <textarea id="editor" v-model="content" rows="16" name="content" placeholder="请输入一段文字" class="uk-width-1-1" style="resize:none;"></textarea>
+                    </div>
                 </div>
-            </div>
-            <!-- <div class="uk-form-row"><div id="result"></div></div> -->
-            <div class="uk-form-row">
-                <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
-                <a v-if="submitted" v-on="click: clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
-
-            </div>
-            <!-- <div class="uk-form-row">
-                <p> ${ result }</p>
-            </div> -->
-
-        </form>
-    </div>
-    <div class="uk-width-1-2">
-        <!-- <label class="uk-form-label">Output:</label> -->
-        <h3>Output:</h3>
-        <div id='vm2'>
-            <h4>Nouns</h4> <p v-text="nouns"></p>
-            <h4>Verbs</h4> <p v-text="verbs"></p>
+                <div class="uk-form-row">
+                    <button v-if="!submitted" type="submit" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> Have a try!</button>
+                    <a v-if="submitted" @click="clean" class="uk-button"><i class="uk-icon-times"></i> Clear</a>
+                    <span v-if="!submitted"> Words count: <span :style="{color: color}" v-text="content.trim().length"></span>/1000</span>
+                </div>
+            </form>
         </div>
-
+        <showresult v-if="submitted" :result='result'></showresult>
     </div>
+</div>
 
+{% endblock %}
 {% endblock %}

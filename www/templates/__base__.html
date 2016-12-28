@@ -6,13 +6,25 @@
     {% block meta %} <!-- block meta --> {% endblock %}
     <title>{% block title %} ? {% endblock %} - 面向没有对象编程 </title>
     <link rel="stylesheet" href="/static/css/uikit.min.css">
-    <!-- <link rel="stylesheet" href="/static/css/uikit.gradient.min.css"> -->
-    <!-- <link rel="stylesheet" href="/static/css/myBlog.css"> -->
+
+
+    <link rel="stylesheet" href="/static/css/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script>
+        hljs.initHighlightingOnLoad();
+        // addEventListener('load', function() {
+        //     var blocks = document.querySelectorAll('pre code.hljs');
+        //     Array.prototype.forEach.call(blocks, function(block) {
+        //         var language = block.result.language;
+        //     });
+        // })
+    </script>
+
+
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/sha1.min.js"></script>
     <script src="/static/js/uikit.min.js"></script>
-    <!-- <script src="/static/js/components/sticky.min.js"></script> -->
-    <script src="/static/js/vue.min.js"></script>
+    <script src="/static/js/vue.js"></script>
     <script src="/static/js/myBlog.js"></script>
     {% block beforehead %} <!-- before head --> {% endblock %}
 </head>
@@ -21,9 +33,9 @@
             <a href="/" class="uk-navbar-brand">Hazy Dawn</a>
             <ul class="uk-navbar-nav">
                 <li data-url="blogs"><a href="/"><i class="uk-icon-home"></i> 日志</a></li>
-                <li><a href="/mecab"><i class="uk-icon-book"></i>Mecab</a></li>
+                <li><a href="/mecab"><i class="uk-icon-book"></i> Mecab</a></li>
                 <li><a href="/info"><i class="uk-icon-book"></i> 关于</a></li>
-                <!-- <li><a target="_blank" href="#"><i class="uk-icon-code"></i> 源码</a></li> -->
+                <li><a href="/bdo_boss"><i class="uk-icon-book"></i> BOSS时间</a></li>
             </ul>
             <div class="uk-navbar-flip">
                 <ul class="uk-navbar-nav">
@@ -44,7 +56,7 @@
             </div>
         </div>
     </nav>
-
+{% block container %}
     <div class="uk-container uk-container-center">
         <div class="uk-grid">
             <!-- content -->
@@ -53,6 +65,7 @@
             <!-- // content -->
         </div>
     </div>
+{% endblock %}
 
     <div class="uk-margin-large-top" style="background-color: #eee; border-top: 1px solid #ccc;">
         <div class="uk-container uk-container-center uk-text-center">
@@ -65,7 +78,6 @@
                 </p>
                 <p>Powered by <a href="#">面向没有对象编程</a>. Copyright &copy; 2016. [<a href="/manage/" target="_blank">Manage</a>]</p>
                 <p><a href="http://www.google.com" target="_blank">www.google.com</a> All rights reserverd.</p>
-                <!-- <a href="#" target="_blank"><i class="uk-icon-html5" style="font-size: 64px; color: #444;"></i></a> -->
             </div>
         </div>
     </div>

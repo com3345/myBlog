@@ -3,17 +3,20 @@
 
 
 from coroweb import get, post
-from models import User, Blog, Comment, next_id
+from models import User, Blog, Comment, next_id, Boss
 from aiohttp import web
 from apis import APIValueError, APIPermissionError, Page
 from markdown2 import markdown
 
+from subprocess import run
 import time
 import re
 import json
 import hashlib
 import logging
 import MeCab
+import json
+from datetime import datetime, timedelta
 
 from stopwords import stopwordslist
 from config import configs
@@ -21,6 +24,13 @@ from config import configs
 COOKIE_NAME = 'myBlogsession'
 _COOKIE_KEY = configs.session.secret
 
+
+BOSS_CD = {
+    "nube": ("努贝尔(ヌベール)", 9, 4),
+    "kutu": ("库图姆(クツム)", 9, 3),
+    "kuza": ("库扎卡(クザカ)", 8, 4),
+    "kara": ("卡兰达(カランダ)", 15, 3)
+}
 
 _RE_EMAIL = re.compile(r'[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
@@ -35,6 +45,28 @@ def _not_in_black_list(word):
     if word in stopwordslist:
         return False
     return True
+
+
+@get('/api/crawl_boss')
+def api_crawl_boss():
+    run("rm bossinfo.json && scrapy crawl bdspider -o bossinfo.json", shell=True, cwd="../bossSpider")
+    with open("../bossSpider/bossinfo.json") as data_file:
+        data = json.load(data_file)
+    bosses = [(
+        el["boss"],
+        BOSS_CD[el["boss"]][0],
+        el["last_time"],
+        el["last_time"] + timedelta(hours=BOSS_CD[el["boss"]][1]).total_seconds(),
+        BOSS_CD[el["boss"]][2]) for el in data]
+    print({boss[0]: boss[1:] for boss in bosses})
+    return {boss[0]: boss[1:] for boss in bosses}
+
+
+@get('/bdo_boss')
+def bosspage():
+    return {
+        '__template__': 'bdo_boss.html'
+    }
 
 
 def parse(c):
@@ -178,11 +210,16 @@ async def api_get_users(*, page='1'):
 
 @post('/api/parse')
 def api_parse_text(*, content):
-    if not content or not content.strip():
+    content = content.strip()
+    if not content:
         raise APIValueError('content', 'content cannot be empty.')
+    if len(content) > 1000:
+        raise APIValueError('content', 'too many words > 1000')
+
     nouns, verbs = parse(content)
     result = dict(nouns=nouns, verbs=verbs)
     print(result)
+
     return result
 
 
@@ -217,7 +254,6 @@ async def api_register_user(*, email, name, passwd):
 
 @post('/api/authenticate')
 async def authenticate(*, email, passwd):
-    print(email, passwd)
     if not email:
         raise APIValueError('email', 'Invalid email.')
     if not passwd:
@@ -247,12 +283,8 @@ async def get_blog(id):
     blog = await Blog.find(id)
     comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
-        print(c.content)
         c.html_content = markdown(c.content)
-        print(c.html_content)
-    print(blog.content)
     blog.html_content = markdown(blog.content)
-    print(blog.html_content)
     return {
         '__template__': 'blog.html',
         'blog': blog,

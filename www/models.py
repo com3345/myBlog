@@ -46,3 +46,10 @@ class Comment(Model):
     user_image = StringField(ddl='varchar(500)')
     content = TextField()
     created_at = FloatField(default=time.time)
+
+
+class Boss(object):
+    """docstring for Boss"""
+    def __init__(self, name, last_time):
+        self.name = name
+        self.last_time = last_time
