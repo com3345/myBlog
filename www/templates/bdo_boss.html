@@ -1,0 +1,108 @@
+{% extends '__base__.html' %}
+
+{% block title %}黑色沙漠BOSS预报{% endblock %}
+
+{% block beforehead %}
+
+<script>
+$(function() {
+    var vm = new Vue({
+        el: '#vm',
+        data: {
+            refresh_flag: true,
+            loading: true,
+            bosses: {
+                nube: [],
+                kutu: [],
+                kuza: [],
+                kara: []
+            }
+        },
+
+        methods: {
+            refresh: function() {
+                    this.loading = true;
+                    getJSON('/api/crawl_boss', 
+                    function(err, result) {
+                    if (err) {
+                        alert('ERROR');
+                    }
+                    else {
+                        vm.bosses.nube = result.nube;
+                        vm.bosses.kutu = result.kutu;
+                        vm.bosses.kuza = result.kuza;
+                        vm.bosses.kara = result.kara;
+                        vm.loading = false;
+                        format_time(vm.bosses.nube);
+                        format_time(vm.bosses.kutu);
+                        format_time(vm.bosses.kuza);
+                        format_time(vm.bosses.kara);
+                    }
+                });
+            },
+
+        },
+        ready(){
+            this.refresh()
+        }
+    });
+});
+function format_time(boss){
+    today = new Date();
+
+    mydate = new Date(boss[1] * 1000);
+    if (mydate.getDate() == today.getDate()) {
+        boss.push('今天')
+    } else {
+        boss.push('昨天')
+    };
+    boss.push(mydate.toTimeString().split(' ')[0].slice(0, 5));
+
+}
+</script>
+
+{% endblock %}
+
+{% block container %}
+<div id="vm" class="uk-container uk-container-center">
+    <div class="uk-grid">
+{% block content %}
+<div class="uk-alert uk-alert-danger uk-hidden"></div>
+
+<div class="uk-width-1-1" align="center">
+        <li v-if="loading">
+            <h4>努贝尔(ヌベール)</h4>
+            <p>
+                <span> 正在加载...</span>
+            </p>
+            <h4>库图姆(クツム)</h4>
+            <p>
+                <span> 正在加载...</span>
+            </p>
+            <h4>库扎卡(クザカ)</h4>
+            <p>
+                <span> 正在加载...</span>
+            </p>
+            <h4>卡兰达(カランダ)</h4>
+            <p>
+                <span> 正在加载...</span>
+            </p>
+
+        </li>
+        <li v-else v-for="boss in bosses">
+            <h4 v-text="boss[0]"></h4>
+            <p><span v-text="boss[4]"></span>
+            <span v-text="boss[5]"></span></p>
+        </li>
+
+    <div class="uk-form-row">
+        <button v-if="refresh_flag" @click="refresh" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> 刷新</button>
+    </div>
+
+</div>
+
+    </div>
+</div>
+
+{% endblock %}
+{% endblock %}
