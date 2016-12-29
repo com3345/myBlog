@@ -19,13 +19,18 @@ $(function() {
                 kara: []
             }
         },
-        computed: {
-            now: function () {
-                vm.now = new Date()
 
-            }
-
+        mounted: function (){
+            this.refresh()
         },
+
+        // computed: {
+        //     now: function () {
+        //         vm.now = new Date()
+
+        //     }
+
+        // },
 
         methods: {
             refresh: function() {
@@ -50,18 +55,18 @@ $(function() {
             },
 
         },
-        ready(){
-            this.refresh();
-            setTimeout(clock, 1500);
-        }
+        // ready(){
+        //     this.refresh();
+        //     setTimeout(clock, 1500);
+        // }
     });
 });
 
-function clock() {
-    var d = new Date();
-    vm.now = d.getDay();
-    setTimeout(clock, 500);
-}
+// function clock() {
+//     var d = new Date();
+//     vm.now = d.getDay();
+//     setTimeout(clock, 500);
+// }
 
 function format_time(boss){
     lastdate = str2time(boss[1]);
