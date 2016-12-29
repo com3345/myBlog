@@ -17,6 +17,7 @@ import logging
 import MeCab
 import json
 from datetime import datetime, timedelta
+import os
 
 from stopwords import stopwordslist
 from config import configs
@@ -49,8 +50,11 @@ def _not_in_black_list(word):
 
 @get('/api/crawl_boss')
 def api_crawl_boss():
-    run("rm bossinfo.json && scrapy crawl bdspider -o bossinfo.json", shell=True, cwd="../bossSpider")
-    with open("../bossSpider/bossinfo.json") as data_file:
+    if os.path.exists("bossinfo.json"):
+        run("rm bossinfo.json", shell=True)
+
+    run("scrapy crawl bdspider -o ../bossinfo.json", shell=True, cwd="./bossSpider")
+    with open("bossinfo.json") as data_file:
         data = json.load(data_file)
     bosses = [(
         el["boss"],
@@ -58,7 +62,7 @@ def api_crawl_boss():
         el["last_time"],
         el["last_time"] + timedelta(hours=BOSS_CD[el["boss"]][1]).total_seconds(),
         BOSS_CD[el["boss"]][2]) for el in data]
-    print({boss[0]: boss[1:] for boss in bosses})
+    logging.info('Successfully scrapyed:', {boss[0]: boss[1:] for boss in bosses})
     return {boss[0]: boss[1:] for boss in bosses}
 
 
