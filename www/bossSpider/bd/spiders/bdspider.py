@@ -18,7 +18,7 @@ class BdItemSpider(scrapy.Spider):
         for post in response.xpath("//div[@class='col-lg-10 col-lg-offset-1']")[2:13]:
             item = BdItem()
             item["title"] = post.xpath(".//a/text()").extract()[0].replace("\u3000", " ").translate(transtab)
-            item["content"] = post.xpath(".//p/text()").extract()[0].replace("\u3000", " ").translate(transtab)
+            item["content"] = ''.join(post.xpath(".//p/text()").extract()).replace("\u3000", " ").translate(transtab)
             item["create_time"] = post.xpath(".//span[@class='pull-right']/text()").extract()[0][5:].split("(")[0]
             yield item
 

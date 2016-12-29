@@ -3,7 +3,7 @@
 
 
 from coroweb import get, post
-from models import User, Blog, Comment, next_id, Boss
+from models import User, Blog, Comment, next_id
 from aiohttp import web
 from apis import APIValueError, APIPermissionError, Page
 from markdown2 import markdown
@@ -62,7 +62,7 @@ def api_crawl_boss():
         el["last_time"],
         el["last_time"] + timedelta(hours=BOSS_CD[el["boss"]][1]).total_seconds(),
         BOSS_CD[el["boss"]][2]) for el in data]
-    logging.info('Successfully scrapyed:', {boss[0]: boss[1:] for boss in bosses})
+    logging.info({boss[0]: boss[1:] for boss in bosses})
     return {boss[0]: boss[1:] for boss in bosses}
 
 

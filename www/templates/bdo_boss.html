@@ -11,12 +11,20 @@ $(function() {
         data: {
             refresh_flag: true,
             loading: true,
+            now: "hahahah",
             bosses: {
                 nube: [],
                 kutu: [],
                 kuza: [],
                 kara: []
             }
+        },
+        computed: {
+            now: function () {
+                vm.now = new Date()
+
+            }
+
         },
 
         methods: {
@@ -33,76 +41,95 @@ $(function() {
                         vm.bosses.kuza = result.kuza;
                         vm.bosses.kara = result.kara;
                         vm.loading = false;
-                        format_time(vm.bosses.nube);
-                        format_time(vm.bosses.kutu);
-                        format_time(vm.bosses.kuza);
-                        format_time(vm.bosses.kara);
+
+                        for (b in vm.bosses) {
+                            format_time(vm.bosses[b]);
+                        }
                     }
                 });
             },
 
         },
         ready(){
-            this.refresh()
+            this.refresh();
+            setTimeout(clock, 1500);
         }
     });
 });
-function format_time(boss){
-    today = new Date();
 
-    mydate = new Date(boss[1] * 1000);
-    if (mydate.getDate() == today.getDate()) {
-        boss.push('今天')
-    } else {
-        boss.push('昨天')
-    };
-    boss.push(mydate.toTimeString().split(' ')[0].slice(0, 5));
-
+function clock() {
+    var d = new Date();
+    vm.now = d.getDay();
+    setTimeout(clock, 500);
 }
+
+function format_time(boss){
+    lastdate = str2time(boss[1]);
+    nextdate = str2time(boss[2]);
+    boss.push(whichday(lastdate) + ' ' + lastdate.toTimeString().split(' ')[0].slice(0, 5));
+
+    if (nextdate.getDay() == 3 && nextdate.getHours() > 6) {    
+        boss.push('周三维护作息紊乱')
+    } else {
+        boss.push(whichday(nextdate) + ' ' + nextdate.toTimeString().split(' ')[0].slice(0, 5));
+    }
+}
+
+function whichday(time) {
+    today = new Date();
+    if (time.getDate() < today.getDate()) {
+        return '昨天'
+    } else if (time.getDate() == today.getDate()) {
+        return '今天'
+    } else {
+        return '明天'
+    }
+}
+
+function str2time(t) {
+    return new Date(t * 1000)
+}
+
 </script>
 
 {% endblock %}
 
 {% block container %}
 <div id="vm" class="uk-container uk-container-center">
-    <div class="uk-grid">
+
 {% block content %}
-<div class="uk-alert uk-alert-danger uk-hidden"></div>
+    <div class="uk-alert uk-alert-danger uk-hidden"></div>
 
-<div class="uk-width-1-1" align="center">
-        <li v-if="loading">
-            <h4>努贝尔(ヌベール)</h4>
-            <p>
-                <span> 正在加载...</span>
-            </p>
-            <h4>库图姆(クツム)</h4>
-            <p>
-                <span> 正在加载...</span>
-            </p>
-            <h4>库扎卡(クザカ)</h4>
-            <p>
-                <span> 正在加载...</span>
-            </p>
-            <h4>卡兰达(カランダ)</h4>
-            <p>
-                <span> 正在加载...</span>
-            </p>
+    <div class="uk-grid uk-width-1-2">
+                
+                <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-2 uk-container-center uk-text-center" v-if="loading"> Loding...</div>
 
-        </li>
-        <li v-else v-for="boss in bosses">
-            <h4 v-text="boss[0]"></h4>
-            <p><span v-text="boss[4]"></span>
-            <span v-text="boss[5]"></span></p>
-        </li>
+                <table class="uk-table uk-table-striped uk-text-center" v-else>
+                    <tbody>
+                        <tr class="uk-text-bold">
+                            <td></td>
+                            <td>最后一次出现</td>
+                            <td>预计下次最早出现</td>
+                            <td>出现概率</td>
+                        </tr>
+                        <tr v-for="boss in bosses">
+                            <td v-text="boss[0]"></td>
+                            <td v-text="boss[4]"></td>
+                            <td v-text="boss[5]"></td>
+                            <td v-text="now"></td>
+                        </tr>
+                    </tbody>
+                </table>
 
-    <div class="uk-form-row">
-        <button v-if="refresh_flag" @click="refresh" class="uk-button uk-button-primary"><i class="uk-icon-star"></i> 刷新</button>
-    </div>
+            <div class="uk-grid">
+                <button v-if="!loading" @click="refresh" class="uk-button uk-container-center uk-button-primary"><i class="uk-icon-star"></i> 刷新</button>
+            </div>
 
-</div>
+
 
     </div>
 </div>
+
 
 {% endblock %}
 {% endblock %}
