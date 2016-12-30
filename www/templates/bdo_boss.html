@@ -1,17 +1,29 @@
-{% extends '__base__.html' %}
+<!DOCTYPE html>
 
-{% block title %}黑色沙漠BOSS预报{% endblock %}
+<html>
+<head>
+    <meta charset="utf-8"/>
 
-{% block beforehead %}
+    <title>黑色沙漠日服BOSS预报系统</title>
+    <link rel="stylesheet" href="/static/css/uikit.min.css">
+    <link rel="stylesheet" href="/static/css/default.min.css">
+    <script src="/static/js/jquery.min.js"></script>
 
+    <script src="/static/js/uikit.min.js"></script>
+    <script src="/static/js/vue.js"></script>
+    <script src="/static/js/myBlog.js"></script>
+
+</head>
 <script>
+
 $(function() {
     var vm = new Vue({
         el: '#vm',
         data: {
-            refresh_flag: true,
+            timerforautorefresh: 0,
+            timerforrefreshbutton: 20,
             loading: true,
-            now: "hahahah",
+            now: new Date(),
             bosses: {
                 nube: [],
                 kutu: [],
@@ -21,24 +33,19 @@ $(function() {
         },
 
         mounted: function (){
-            this.refresh()
+            this.refresh();
+            this.interval = setInterval(this.clock, 1000)
         },
-
-        // computed: {
-        //     now: function () {
-        //         vm.now = new Date()
-
-        //     }
-
-        // },
 
         methods: {
             refresh: function() {
                     this.loading = true;
+                    this.timerforautorefresh = 0;
+                    this.timerforrefreshbutton = 20;
                     getJSON('/api/crawl_boss', 
                     function(err, result) {
                     if (err) {
-                        alert('ERROR');
+                        alert('ERROR: Refresh too often!');
                     }
                     else {
                         vm.bosses.nube = result.nube;
@@ -50,23 +57,57 @@ $(function() {
                         for (b in vm.bosses) {
                             format_time(vm.bosses[b]);
                         }
+                        // boss: [
+                        //     name, 
+                        //     last_time_timestamp, 
+                        //     next_time_timestamp, 
+                        //     last_time_formated, 
+                        //     next_time_formated,
+                        //     current_probablity
+                        // ]
                     }
                 });
             },
+            clock: function() {
+                this.now = new Date();
+                this.timerforautorefresh += 1;
+                this.timerforrefreshbutton -= 1;
+                if (this.timerforautorefresh > 60) {
 
+                    this.refresh()
+                }
+            },
+            probability: function(boss) {
+
+                nextdate = str2time(boss[2]);
+                var prob = '';
+
+                if (vm.now < nextdate) {
+
+                    prob = 0
+                } else {
+                    prob = (this.now - nextdate) / (3600 * boss[3] * 1000) * 100
+                }
+                return prob
+            },
+            bosscolor: function(prob) {
+                var c = '';
+                if (prob < 25 && prob > 0) {
+                    c = 'uk-text-primary'
+                } else if (prob < 50 && prob >= 25) {
+                    c = 'uk-text-success'
+                } else if (prob < 75 && prob >= 50) {
+                    c = 'uk-text-warning'
+                } else if (prob >= 75) {
+                    c = 'uk-text-danger'
+                }
+                return c
+            }
         },
-        // ready(){
-        //     this.refresh();
-        //     setTimeout(clock, 1500);
-        // }
     });
 });
 
-// function clock() {
-//     var d = new Date();
-//     vm.now = d.getDay();
-//     setTimeout(clock, 500);
-// }
+
 
 function format_time(boss){
     lastdate = str2time(boss[1]);
@@ -78,6 +119,7 @@ function format_time(boss){
     } else {
         boss.push(whichday(nextdate) + ' ' + nextdate.toTimeString().split(' ')[0].slice(0, 5));
     }
+    boss.push(0)
 }
 
 function whichday(time) {
@@ -97,17 +139,42 @@ function str2time(t) {
 
 </script>
 
-{% endblock %}
+<body>
+<div></div>
 
-{% block container %}
-<div id="vm" class="uk-container uk-container-center">
+<div id="vm" class="uk-container uk-container-center uk-margin-large">
+    <div class="uk-container uk-container-center uk-width-4-5">
+    <div class="uk-block-primary uk-contrast uk-margin">
+        <div class="uk-container uk-vertical-align" style="height: 40px;">
+        <div class="uk-vertical-align-middle uk-width-1-2">黑色沙漠日服BOSS预报系统 Ver 0.9</div>
+        <div class="uk-vertical-align-bottom uk-width-1-2" align="right">By Makiko</div>
+        </div>
+    </div>
+    </div>
 
-{% block content %}
+
+    <div class="uk-container uk-container-center uk-width-4-5">
+        <div class="uk-width-1-2">
+        <table class="uk-table uk-table-striped uk-text-center">
+        
+            <tbody>
+                <tr class="uk-text-bold">
+                    <td>现实时间</td>
+                    <td>黑沙时间</td>
+                </tr>
+                <tr>
+                    <td v-text="now.toTimeString().split(' ')[0]"></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+
     <div class="uk-alert uk-alert-danger uk-hidden"></div>
+    <div class="uk-container uk-container-center uk-width-4-5">
 
-    <div class="uk-grid uk-width-1-2">
-                
-                <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-2 uk-container-center uk-text-center" v-if="loading"> Loding...</div>
+        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center" v-if="loading"> Loading...</div>
 
                 <table class="uk-table uk-table-striped uk-text-center" v-else>
                     <tbody>
@@ -115,26 +182,23 @@ function str2time(t) {
                             <td></td>
                             <td>最后一次出现</td>
                             <td>预计下次最早出现</td>
-                            <td>出现概率</td>
+                            <td>当前出现概率</td>
                         </tr>
                         <tr v-for="boss in bosses">
-                            <td v-text="boss[0]"></td>
+                            <td v-text="boss[0]" :class="bosscolor(probability(boss))"></td>
                             <td v-text="boss[4]"></td>
                             <td v-text="boss[5]"></td>
-                            <td v-text="now"></td>
+                            <td v-text="probability(boss).toFixed(2) + '%'"></td>
                         </tr>
                     </tbody>
                 </table>
 
-            <div class="uk-grid">
-                <button v-if="!loading" @click="refresh" class="uk-button uk-container-center uk-button-primary"><i class="uk-icon-star"></i> 刷新</button>
-            </div>
-
-
-
+        <div class="uk-width-1-2 uk-container-center uk-text-center">
+            <button v-if="!loading" @click="refresh" class="uk-button uk-container-center uk-button-primary" :disabled="timerforrefreshbutton > 0">
+                <i class="uk-icon-star"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
+            </button>
+        </div>
     </div>
+    
 </div>
-
-
-{% endblock %}
-{% endblock %}
+</body>

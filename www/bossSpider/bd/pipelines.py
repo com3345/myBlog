@@ -11,9 +11,9 @@ from scrapy.exceptions import DropItem
 
 
 P_NUBE = "ぬ|ヌ|nube|nu"  # 1
-P_KUTUMU = "つ|ツ|kutu|靴"  # 2
+P_KUTUMU = "くつ|クツ|kutu|靴"  # 2
 P_KUZAKA = "くざ|クザカ|kuza"  # 3
-P_KARANDA = "カランダ"  # 4
+P_KARANDA = "カランダ|kara"  # 4
 
 
 def findbosstype(text):
@@ -29,6 +29,7 @@ def findbosstype(text):
     if any(re.findall(P_KARANDA, text)):
         # return "卡兰达(カランダ)"
         return "kara"
+    return None
 
 
 class BdPipeline(object):
@@ -42,19 +43,26 @@ class BdPipeline(object):
 
         re_time = re.compile(
             r"\d{1,2}：\d{1,2}|\d{1,2}:\d{1,2}|\d{2,4}|\d{1,2}\w\d{1,2}")
-        last_time = re_time.search(item["content"])
 
+        # 找时间，先找标题再找内容，没有就丢了
+        last_time = re_time.search(item["title"])
         if last_time:
             last_time = last_time.group(0)
+        elif re_time.search(item["content"]):
+            last_time = re_time.search(item["content"]).group(0)
         else:
-            last_time = re_time.search(item["title"]).group(0)
+            raise DropItem()
 
+        # 规范化时间，并赋值给item['last_time']
         if ":" in last_time:
             hour, minute = last_time.split(":")
         elif "時" in last_time:
             hour, minute = last_time.split("時")
         else:
             hour, minute = last_time[:2], last_time[2:]
+
+        if hour >= "24":
+            hour = str(int(hour) - 24)
 
         ymd = datetime.strptime(item["create_time"], "%Y年%m月%d日")
 
@@ -65,10 +73,14 @@ class BdPipeline(object):
             hour=int(hour),
             minute=int(minute)).timestamp()
 
-        item["boss"] = findbosstype(item["content"] + item["title"])
+        # 找boss类型， 先找标题，再找内容，找不到丢掉
+        if findbosstype(item['title']):
+            item["boss"] = findbosstype(item['title'])
+        elif findbosstype(item['content']):
+            item["boss"] = findbosstype(item["title"])
+        else:
+            raise DropItem()
 
-        # print(self.newest_nube["last_time"], "\t", self.newest_kutu["last_time"], "\t", self.newest_kuza["last_time"], "\t", self.newest_kara["last_time"])
-        # print(item["boss"], item["last_time"])
         if item["boss"] == "nube" and item["last_time"] > self.newest_nube["last_time"]:
             self.newest_nube = item
             return item
