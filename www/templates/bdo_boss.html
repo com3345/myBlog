@@ -37,7 +37,9 @@ $(function() {
         computed: {
             night: function () {
                 var res = true;
-                var now_h = this.now.getHours();
+                var timez_shift_to_Jp = 9 + this.now.getTimezoneOffset() / 60;
+                var now_h = this.now.getHours() + timez_shift_to_Jp ;
+
                 var now_m = this.now.getMinutes();
                 var minutes = now_h * 60 + now_m;  // 0 ~ 1440 从现实世界0点开始到现在的分钟数
                 if (minutes > 0 && minutes <= 40) {
@@ -60,19 +62,19 @@ $(function() {
                         // 白天
                         res = false;
                         this.nextnight = 240 - rem;
-                        this.bdnow[0] = float2int(((rem - 39)* 4.5) / 60) + 7; // 7点开始算
-                        this.bdnow[1] = float2int(((rem - 39)* 4.5) % 60);
+                        this.bdnow[0] = float2int(((rem - 40)* 4.5) / 60) + 7; // 7点开始算
+                        this.bdnow[1] = float2int(((rem - 40)* 4.5) % 60);
 
                     } else {
                         // 夜里
                         res = true;
                         this.nextnight = 0;
                         this.nightleft = 40 - rem;
-                        this.bdnow[0] = float2int(((rem + 1) * 13.5) / 60) + 22; // 22点开始算
+                        this.bdnow[0] = float2int(((rem) * 13.5) / 60) + 22; // 22点开始算
                         if (this.bdnow[0] >= 24) {
                             this.bdnow[0] -= 24
                         }
-                        this.bdnow[1] = float2int(((rem + 1) * 13.5) % 60) 
+                        this.bdnow[1] = float2int(((rem) * 13.5) % 60) 
                     }
                 }
                 return res
