@@ -24,11 +24,58 @@ $(function() {
             timerforrefreshbutton: 20,
             loading: true,
             now: new Date(),
+            bdnow: [],
+            nextnight: 0,
+            leftnight: 0,
             bosses: {
                 nube: [],
                 kutu: [],
                 kuza: [],
                 kara: []
+            }
+        },
+        computed: {
+            night: function () {
+                var res = true;
+                var now_h = this.now.getHours();
+                var now_m = this.now.getMinutes();
+                var minutes = now_h * 60 + now_m;  // 0 ~ 1440 从现实世界0点开始到现在的分钟数
+                if (minutes > 0 && minutes <= 40) {
+                    // 白天 现实世界0点～0:40的游戏白天
+                    res = false;
+                    this.nextnight = 40 - minutes
+                    this.bdnow[0] = float2int(((160 + minutes) * 4.5) / 60) + 7;
+                    this.bdnow[1] = float2int(((160 + minutes) * 4.5) % 60);
+                } else if (minutes > 1280 && minutes <= 1440) {
+                    // 白天 现实世界21:20~0点的游戏白天
+                    res = false;
+                    this.nextnight = 1480 - minutes;
+                    this.bdnow[0] = float2int(((minutes - 1280) * 4.5) / 60) + 7;
+                    this.bdnow[1] = float2int(((minutes - 1280) * 4.5) % 60)
+
+                } else {
+                    // alert(minutes);
+                    var rem = minutes % 240 - 40; // 超过游戏每个夜昼循环循环开始的真实世界分钟数
+                    if (rem >= 40 ) {
+                        // 白天
+                        res = false;
+                        this.nextnight = 240 - rem;
+                        this.bdnow[0] = float2int(((rem - 39)* 4.5) / 60) + 7; // 7点开始算
+                        this.bdnow[1] = float2int(((rem - 39)* 4.5) % 60);
+
+                    } else {
+                        // 夜里
+                        res = true;
+                        this.nextnight = 0;
+                        this.nightleft = 40 - rem;
+                        this.bdnow[0] = float2int(((rem + 1) * 13.5) / 60) + 22; // 22点开始算
+                        if (this.bdnow[0] >= 24) {
+                            this.bdnow[0] -= 24
+                        }
+                        this.bdnow[1] = float2int(((rem + 1) * 13.5) % 60) 
+                    }
+                }
+                return res
             }
         },
 
@@ -57,14 +104,6 @@ $(function() {
                         for (b in vm.bosses) {
                             format_time(vm.bosses[b]);
                         }
-                        // boss: [
-                        //     name, 
-                        //     last_time_timestamp, 
-                        //     next_time_timestamp, 
-                        //     last_time_formated, 
-                        //     next_time_formated,
-                        //     current_probablity
-                        // ]
                     }
                 });
             },
@@ -112,12 +151,12 @@ $(function() {
 function format_time(boss){
     lastdate = str2time(boss[1]);
     nextdate = str2time(boss[2]);
-    boss.push(whichday(lastdate) + ' ' + lastdate.toTimeString().split(' ')[0].slice(0, 5));
+    boss.push(whichday(lastdate) + ' ' + time2hourminute(lastdate));
 
     if (nextdate.getDay() == 3 && nextdate.getHours() > 6) {    
         boss.push('周三维护作息紊乱')
     } else {
-        boss.push(whichday(nextdate) + ' ' + nextdate.toTimeString().split(' ')[0].slice(0, 5));
+        boss.push(whichday(nextdate) + ' ' + time2hourminute(nextdate));
     }
     boss.push(0)
 }
@@ -135,6 +174,14 @@ function whichday(time) {
 
 function str2time(t) {
     return new Date(t * 1000)
+}
+
+function time2hourminute(t) {
+    return t.toTimeString().split(' ')[0].slice(0, 5)
+}
+
+function float2int(f) {
+    return f | 0
 }
 
 </script>
@@ -161,10 +208,19 @@ function str2time(t) {
                 <tr class="uk-text-bold">
                     <td>现实时间</td>
                     <td>黑沙时间</td>
+                    <td>黑商情报</td>
                 </tr>
                 <tr>
                     <td v-text="now.toTimeString().split(' ')[0]"></td>
-                    <td></td>
+                    <td>
+                        <span v-if="night">夜里</span>
+                        <span v-else>白天</span>
+                        <span v-text="bdnow[0].toString() + ':' + bdnow[1].toString()"></span>
+                    </td>
+                    <td> 
+                        <span v-if="nextnight > 0" v-text="nextnight.toString() + ' 分钟后出现'"></span>
+                        <span v-else v-text="nightleft.toString() + ' 分钟后消失'"></span>
+                    </td>
                 </tr>
             </tbody>
         </table>
