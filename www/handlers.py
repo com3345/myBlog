@@ -28,7 +28,7 @@ _COOKIE_KEY = configs.session.secret
 
 BOSS_CD = {
     "nube": ("努贝尔(ヌベール)", 9, 4),
-    "kutu": ("库图姆(クツム)", 9, 3),
+    "kutu": ("库图姆(クツム)", 9, 4),
     "kuza": ("库扎卡(クザカ)", 8, 4),
     "kara": ("卡兰达(カランダ)", 15, 3)
 }

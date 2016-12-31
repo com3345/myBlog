@@ -4,19 +4,19 @@
 <head>
     <meta charset="utf-8"/>
 
-    <title>黑色沙漠日服BOSS预报系统</title>
+    <title>黑色沙漠日服 天气预报系统</title>
     <link rel="stylesheet" href="/static/css/uikit.min.css">
     <link rel="stylesheet" href="/static/css/default.min.css">
     <script src="/static/js/jquery.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.16/clipboard.min.js"></script>
     <script src="/static/js/uikit.min.js"></script>
     <script src="/static/js/vue.js"></script>
     <script src="/static/js/myBlog.js"></script>
 
-</head>
 <script>
 
 $(function() {
+    new Clipboard('.btn');
     var vm = new Vue({
         el: '#vm',
         data: {
@@ -80,7 +80,25 @@ $(function() {
                     }
                 }
                 return res
-            }
+            },
+            data2clipboard: function () {
+                var text = '';
+
+                text += '[龙]:上次' + this.bosses.nube[4] + ', 预计下次' + this.bosses.nube[5] + '\n';
+                text += '[虫]:上次' + this.bosses.kutu[4] + ', 预计下次' + this.bosses.kutu[5] + '\n';
+                text += '[库]:上次' + this.bosses.kuza[4] + ', 预计下次' + this.bosses.kuza[5] + '\n';
+                text += '[鸟]:上次' + this.bosses.kara[4] + ', 预计下次' + this.bosses.kara[5] + '\n';
+                text += 'Ps:(预计下次)指下次最早可能出现的时间\n';
+                // text += '游戏夜晚信息:'
+                if (this.nextnight > 0) {
+                    text += '距游戏内晚上还有' + this.nextnight.toString() + '分钟.';
+                } else {
+                    text += '离游戏内晚上结束还有' + this.nightleft.toString() + '分钟';
+                }
+                text += '该信息由\n黑沙天气预报 http://goo.gl/P2WEsv 提供';
+
+                return text
+            },
         },
 
         mounted: function (){
@@ -199,6 +217,7 @@ function float2int(f) {
         <div class="uk-container uk-vertical-align" style="height: 40px;">
         <div class="uk-vertical-align-middle uk-width-1-2">黑色沙漠日服BOSS预报系统 Ver 0.9</div>
         <div class="uk-vertical-align-bottom uk-width-1-2" align="right">By Makiko</div>
+        <!-- <div class="uk-vertical-align-bottom uk-width-1-2"><img src="/static/imgs/signature.png" align="right"></div> -->
         </div>
     </div>
     </div>
@@ -233,7 +252,9 @@ function float2int(f) {
 
     <div class="uk-container uk-container-center uk-width-4-5">
 
-        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center" v-if="loading"> Loading...</div>
+        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center uk-vertical-align" v-if="loading" style="height: 225px"> 
+        <div class="uk-vertical-align-middle">Loading...</div>
+        </div>
 
                 <table class="uk-table uk-table-striped uk-text-center" v-else>
                     <tbody>
@@ -252,35 +273,50 @@ function float2int(f) {
                     </tbody>
                 </table>
 
-        <div class="uk-width-1-2 uk-container-center uk-text-center">
-            <button v-if="!loading" @click="refresh" class="uk-button uk-button-primary" :disabled="timerforrefreshbutton > 0">
-                <i class="uk-icon-star"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
-            </button>
+        <div class="uk-container-center uk-text-center uk-width-4-5">
+
+
+                <button v-if="!loading" @click="refresh" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0">
+                    <i class="uk-icon-refresh"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
+                </button>
+
+
+    <!-- Target -->
+                <button v-if="!loading" class="uk-button uk-button uk-width-1-3 btn" :data-clipboard-text="data2clipboard">
+                <i class="uk-icon-share"></i> 复制到剪贴板
+                </button>
+
+
         </div>
     </div>
 
     <div class="uk-container uk-container-center uk-width-4-5 uk-margin">
-    <div class="uk-block uk-block-muted">
+        <!-- <hr> -->
+    <div class="uk-block uk-block-primary uk-padding-vertical-remove uk-contrast">
 
-                                <div class="uk-container">
+                                <div class="uk-container  uk-text-center">
 
                                     <!-- <h3>Links</h3> -->
 
                                     <div class="uk-grid uk-grid-match" data-uk-grid-margin="">
                                         <div class="uk-width-medium-1-3 uk-row-first">
-                                            <h3>Links</h3>
+                                            <!-- <h3>Links</h3> -->
                                             <div class="uk-panel">
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
+                                                <!-- <h4>Links</h4> -->
+                                                <p>
+                                                    <a href="http://bddatabase.net/jp/" target="_blank">BDO 数据库(日文/英文)</a>
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="uk-width-medium-1-3">
                                             <div class="uk-panel">
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
+                                            <p>
+    <a href="http://blackdesert.swiki.jp/index.php?知識%2F地形" target="_blank">知识任务wiki(日文)</a></p>
                                             </div>
                                         </div>
                                         <div class="uk-width-medium-1-3">
                                             <div class="uk-panel">
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
+                                                <p><a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=09ec745b2da93febe556df17baf0bf0916df97a8f19bfe7ba897cd7bc47828fd"><i class="uk-icon-qq"> 日服群</i></a></p>
                                             </div>
                                         </div>
                                     </div>
@@ -289,5 +325,10 @@ function float2int(f) {
 
                             </div>
     </div>
+
+
+
 </div>
+
+
 </body>
