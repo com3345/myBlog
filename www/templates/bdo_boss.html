@@ -84,18 +84,18 @@ $(function() {
             data2clipboard: function () {
                 var text = '';
 
-                text += '[龙]:上次' + this.bosses.nube[4] + ', 预计下次' + this.bosses.nube[5] + '\n';
-                text += '[虫]:上次' + this.bosses.kutu[4] + ', 预计下次' + this.bosses.kutu[5] + '\n';
-                text += '[库]:上次' + this.bosses.kuza[4] + ', 预计下次' + this.bosses.kuza[5] + '\n';
-                text += '[鸟]:上次' + this.bosses.kara[4] + ', 预计下次' + this.bosses.kara[5] + '\n';
-                text += 'Ps:(预计下次)指下次最早可能出现的时间\n';
+                text += '[龙]:上次' + this.bosses.nube[4] + ', 预计' + this.bosses.nube[5] + '\n';
+                text += '[虫]:上次' + this.bosses.kutu[4] + ', 预计' + this.bosses.kutu[5] + '\n';
+                text += '[库]:上次' + this.bosses.kuza[4] + ', 预计' + this.bosses.kuza[5] + '\n';
+                text += '[鸟]:上次' + this.bosses.kara[4] + ', 预计' + this.bosses.kara[5] + '\n';
+                text += 'Ps:(预计)指本次最早可能出现的时间\n';
                 // text += '游戏夜晚信息:'
                 if (this.nextnight > 0) {
-                    text += '距游戏内晚上还有' + this.nextnight.toString() + '分钟.';
+                    text += '距 游戏内夜晚 还有' + this.nextnight.toString() + '分钟.';
                 } else {
-                    text += '离游戏内晚上结束还有' + this.nightleft.toString() + '分钟';
+                    text += '离 游戏内夜晚 结束还有' + this.nightleft.toString() + '分钟';
                 }
-                text += '该信息由\n黑沙天气预报 http://goo.gl/P2WEsv 提供';
+                text += '\n该信息由黑色沙漠天气预报系统提供\n访问http://hazydawn.com/bdo_boss';
 
                 return text
             },
@@ -173,6 +173,7 @@ $(function() {
 function format_time(boss){
     lastdate = str2time(boss[1]);
     nextdate = str2time(boss[2]);
+    alert(nextdate);
     boss.push(whichday(lastdate) + ' ' + time2hourminute(lastdate));
 
     if (nextdate.getDay() == 3 && nextdate.getHours() > 6) {    
@@ -184,13 +185,23 @@ function format_time(boss){
 }
 
 function whichday(time) {
-    today = new Date();
-    if (time.getDate() < today.getDate()) {
-        return '昨天'
-    } else if (time.getDate() == today.getDate()) {
+    var now = new Date();
+    var now_day = now.getDate();
+    var time_day = time.getDate();
+    var now_year = now.getFullYear();
+    var time_year = now.getFullYear();
+    if (now_day == time_day) {
         return '今天'
-    } else {
+    } else if (now_year == time_year) {
+        if (now_day > time_day) {
+            return '明天'
+        } else {
+            return '昨天'
+        }
+    } else if (now_year < time_year) {
         return '明天'
+    } else {
+        return '昨天'
     }
 }
 
