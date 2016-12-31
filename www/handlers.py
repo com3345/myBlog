@@ -56,6 +56,8 @@ def api_crawl_boss():
     run("scrapy crawl bdspider -o ../bossinfo.json", shell=True, cwd="./bossSpider")
     with open("bossinfo.json") as data_file:
         data = json.load(data_file)
+    run("rm bossinfo.json", shell=True)
+
     bosses = [(
         el["boss"],
         BOSS_CD[el["boss"]][0],
