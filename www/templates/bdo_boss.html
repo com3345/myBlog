@@ -173,7 +173,6 @@ $(function() {
 function format_time(boss){
     lastdate = str2time(boss[1]);
     nextdate = str2time(boss[2]);
-    alert(nextdate);
     boss.push(whichday(lastdate) + ' ' + time2hourminute(lastdate));
 
     if (nextdate.getDay() == 3 && nextdate.getHours() > 6) {    
