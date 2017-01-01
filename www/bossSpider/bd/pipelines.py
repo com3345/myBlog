@@ -61,10 +61,9 @@ class BdPipeline(object):
         else:
             hour, minute = last_time[:2], last_time[2:]
 
-        if hour >= "24":
+        if int(hour) >= 24:
             hour = str(int(hour) - 24)
-
-        ymd = datetime.strptime(item["create_time"], "%Y年%m月%d日")
+        ymd = datetime.strptime(''.join(item["create_time"].split()), "%Y年%m月%d日")
 
         item["last_time"] = datetime(
             year=ymd.year,

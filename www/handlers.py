@@ -18,6 +18,7 @@ import MeCab
 import json
 from datetime import datetime, timedelta
 import os
+import random
 
 from stopwords import stopwordslist
 from config import configs
@@ -46,6 +47,27 @@ def _not_in_black_list(word):
     if word in stopwordslist:
         return False
     return True
+
+
+def random_line(afile):
+    line = next(afile)
+    for num, aline in enumerate(afile):
+        if random.randrange(num + 2):
+            continue
+        line = aline
+    return line
+
+
+@get('/api/get_joke')
+def api_get_joke():
+    file_path = './static/joke001.txt'
+
+    with open(file_path) as f:
+        joke = random_line(f).strip()
+        if '$$$' in joke:
+            joke = ' '.join(joke.split('$$$'))
+        print(joke)
+        return dict(joke=joke)
 
 
 @get('/api/crawl_boss')

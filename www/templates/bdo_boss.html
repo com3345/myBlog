@@ -22,9 +22,11 @@ $(function() {
         data: {
             timerforautorefresh: 0,
             timerforrefreshbutton: 20,
+            firstloading: true,
             loading: true,
             now: new Date(),
             bdnow: [],
+            loadingjoke: '',
             nextnight: 0,
             leftnight: 0,
             bosses: {
@@ -33,6 +35,12 @@ $(function() {
                 kuza: [],
                 kara: []
             }
+        },
+        mounted: function (){
+            this.get_joke();
+            this.refresh();
+            this.firstloading = false;
+            setInterval(this.clock, 1000)
         },
         computed: {
             night: function () {
@@ -54,7 +62,7 @@ $(function() {
                     res = false;
                     this.nextnight = 1480 - minutes;
                     this.bdnow[0] = float2int(((minutes - 1280) * 4.5) / 60) + 7;
-                    this.bdnow[1] = float2int(((minutes - 1280) * 4.5) % 60)
+                    this.bdnow[1] = float2int(((minutes - 1280) * 4.5) % 60);
 
                 } else {
                     // alert(minutes);
@@ -76,7 +84,7 @@ $(function() {
                         if (this.bdnow[0] >= 24) {
                             this.bdnow[0] -= 24
                         }
-                        this.bdnow[1] = float2int(((rem) * 13.5) % 60) 
+                        this.bdnow[1] = float2int(((rem) * 13.5) % 60);
                     }
                 }
                 return res
@@ -91,23 +99,39 @@ $(function() {
                 text += 'Ps:(预计)指本次最早可能出现的时间\n';
                 // text += '游戏夜晚信息:'
                 if (this.nextnight > 0) {
-                    text += '距 游戏内夜晚 还有' + this.nextnight.toString() + '分钟.';
+                    text += '距游戏内夜晚 降临 还有' + this.nextnight.toString() + '分钟.';
                 } else {
-                    text += '离 游戏内夜晚 结束还有' + this.nightleft.toString() + '分钟';
+                    text += '离游戏内夜晚 结束 还有' + this.nightleft.toString() + '分钟';
                 }
                 text += '\n该信息由黑色沙漠天气预报系统提供\n访问http://hazydawn.com/bdo_boss';
 
                 return text
             },
+            showloading: function () 
+            {
+                var res = false;
+                if (this.firstloading) {
+                    if (this.loading) {
+                        res = true;
+                    } else {
+                        res = false;
+                    }
+                } else {
+                    if (this.timerforrefreshbutton > 15) {
+                        res = true;
+                    } else {
+                        res = false;
+                    }
+                }
+                return res
+            },
         },
 
-        mounted: function (){
-            this.refresh();
-            this.interval = setInterval(this.clock, 1000)
-        },
+
 
         methods: {
             refresh: function() {
+                    this.get_joke();
                     this.loading = true;
                     this.timerforautorefresh = 0;
                     this.timerforrefreshbutton = 20;
@@ -121,14 +145,31 @@ $(function() {
                         vm.bosses.kutu = result.kutu;
                         vm.bosses.kuza = result.kuza;
                         vm.bosses.kara = result.kara;
-                        vm.loading = false;
 
+                        vm.loading = false;
                         for (b in vm.bosses) {
                             format_time(vm.bosses[b]);
                         }
                     }
-                });
+                    });
+
             },
+
+            get_joke: function () {
+                    getJSON('/api/get_joke',
+                    function (err, result) {
+                        
+                        if (err) {
+                            alert('ERROR:我们没有笑话了！');
+                        } else {
+                            if (result.joke.indexOf('$$$') > -1 ) {
+                                vm.loadingjoke = result.joke.split()
+                            }
+                            vm.loadingjoke = result.joke;
+                        }
+                    });
+            },
+
             clock: function() {
                 this.now = new Date();
                 this.timerforautorefresh += 1;
@@ -262,11 +303,17 @@ function float2int(f) {
 
     <div class="uk-container uk-container-center uk-width-4-5">
 
-        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center uk-vertical-align" v-if="loading" style="height: 225px"> 
-        <div class="uk-vertical-align-middle">Loading...</div>
-        </div>
 
-                <table class="uk-table uk-table-striped uk-text-center" v-else>
+
+
+        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center uk-vertical-align" v-if="loading" style="height: 225px"> 
+            <div class="uk-vertical-align-middle">
+                <p>Loading...</p>
+                <p><div v-text="loadingjoke"></div></p>
+            </div>
+        </div>
+        <div v-else>
+                <table class="uk-table uk-table-striped uk-text-center">
                     <tbody>
                         <tr class="uk-text-bold">
                             <td></td>
@@ -286,17 +333,18 @@ function float2int(f) {
         <div class="uk-container-center uk-text-center uk-width-4-5">
 
 
-                <button v-if="!loading" @click="refresh" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0">
+                <button @click="refresh" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0">
                     <i class="uk-icon-refresh"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
                 </button>
 
 
     <!-- Target -->
-                <button v-if="!loading" class="uk-button uk-button uk-width-1-3 btn" :data-clipboard-text="data2clipboard">
+                <button class="uk-button uk-button uk-width-1-3 btn" :data-clipboard-text="data2clipboard">
                 <i class="uk-icon-share"></i> 复制到剪贴板
                 </button>
 
 
+        </div>
         </div>
     </div>
 
