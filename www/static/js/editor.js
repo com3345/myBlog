@@ -7,7 +7,6 @@ $(function() {
         var src = $(this).val();
         
         var html = marked(src);
-        alert(html);
         $('#result').html(html);
         
         $('pre code').each(function(i, block) {
