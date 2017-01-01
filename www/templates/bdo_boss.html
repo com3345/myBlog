@@ -230,10 +230,12 @@ function whichday(time) {
     var time_day = time.getDate();
     var now_year = now.getFullYear();
     var time_year = now.getFullYear();
+    // alert(now_day);
+    // alert(time_day);
     if (now_day == time_day) {
         return '今天'
     } else if (now_year == time_year) {
-        if (now_day > time_day) {
+        if (now_day < time_day) {
             return '明天'
         } else {
             return '昨天'
