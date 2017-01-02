@@ -12,11 +12,33 @@
     <script src="/static/js/uikit.min.js"></script>
     <script src="/static/js/vue.js"></script>
     <script src="/static/js/myBlog.js"></script>
+<!--     <link type="text/css" rel="stylesheet" href="/static/css/jquery.qtip.min.css">
 
+    <script type="text/javascript" src="/static/js/jquery.qtip.min.js"></script>
+    <script type="text/javascript" src="/static/js/tooltips.min.js"></script> -->
+<style type="text/css">
+a:link {
+    color: SlateGrey;}
+</style>
 <script>
 
 $(function() {
     new Clipboard('.btn');
+    var themecolorlist = [
+        ["linear-gradient(to right, #ccccff 0%, #ff99cc 100%)","rgba(255, 153, 204, 0.05)", "rgba(255, 153, 204, 0.85)"],
+        ["linear-gradient(to right, #99ff33 0%, #66ccff 100%)", "rgba(102, 204, 255, 0.05)", "rgba(102, 204, 255, 0.85)"],
+        ["linear-gradient(to right, #ff9900 0%, #ff0000 100%)", "rgba(255, 0, 0, 0.05)", "rgba(255, 0, 0, 0.85)"],
+        ["rgb(84, 132, 164)", "rgba(84, 132, 164, 0.05)", "rgb(84, 132, 164, 0.85)"],
+        ["rgb(246, 209, 85)", "rgba(246, 209, 85, 0.05)", "rgba(246, 209, 85, 0.85)"],
+        ["rgb(0, 75, 141)", "rgba(0, 75, 141, 0.05)", "rgba(0, 75, 141, 0.85)"],
+        ["rgb(242, 85, 44)", "rgba(242, 85, 44, 0.05)", "rgba(242, 85, 44, 0.85)"],
+        ["rgb(149, 222, 227)", "rgba(149, 222, 227, 0.05)", "rgba(149, 222, 227, 0.85)"],
+        ["rgb(237, 205, 194)", "rgba(237, 205, 194, 0.05)", "rgba(237, 205, 194, 0.85)"],
+        ["rgb(136, 176, 75)", "rgba(136, 176, 75, 0.05)", "rgba(136, 176, 75, 0.85)"],
+        ["rgb(206, 49, 117)", "rgba(206, 49, 117, 0.05)", "rgba(206, 49, 117, 0.85)"],
+        ["rgb(90, 114, 71)", "rgba(90, 114, 71, 0.05)", "rgba(90, 114, 71, 0.85)"],
+        ["rgb(207, 176, 149)", "rgba(207, 176, 149, 0.05)", "rgba(207, 176, 149, 0.85)"]
+    ];
     var vm = new Vue({
         el: '#vm',
         data: {
@@ -34,7 +56,7 @@ $(function() {
                 kutu: [],
                 kuza: [],
                 kara: []
-            }
+            },
         },
         mounted: function (){
             this.get_joke();
@@ -43,6 +65,12 @@ $(function() {
             setInterval(this.clock, 1000)
         },
         computed: {
+            themecolor: function () {
+
+                return themecolorlist[Math.floor(Math.random() * themecolorlist.length)]
+            },
+
+
             night: function () {
                 var res = true;
                 var timez_shift_to_Jp = 9 + this.now.getTimezoneOffset() / 60;
@@ -89,9 +117,25 @@ $(function() {
                 }
                 return res
             },
+            timezonestring: function () { 
+                var timezoneoffset = this.now.getTimezoneOffset() / 60 ;
+                var timezone = '';
+                if (timezoneoffset == -9) {
+                    timezone = '东京时间'
+                } else if (timezoneoffset == -8) {
+                    timezone = '北京时间'
+                } else if (timezone >= 0) {
+                    timezone = timezoneoffset.toString() + '时区时间'
+                } else {
+                    timezone = (- timezoneoffset).toString() + '时区时间'
+                }
+                return timezone
+            },
+
             data2clipboard: function () {
                 var text = '';
 
+                text += '以下皆为 ' + this.timezonestring + '\n';
                 text += '[龙]:上次' + this.bosses.nube[4] + ', 预计' + this.bosses.nube[5] + '\n';
                 text += '[虫]:上次' + this.bosses.kutu[4] + ', 预计' + this.bosses.kutu[5] + '\n';
                 text += '[库]:上次' + this.bosses.kuza[4] + ', 预计' + this.bosses.kuza[5] + '\n';
@@ -204,7 +248,10 @@ $(function() {
                     c = 'uk-text-danger'
                 }
                 return c
-            }
+            },
+            whichdialog: function (index) {
+                return "#modal" + index.toString()
+            },
         },
     });
 });
@@ -230,8 +277,6 @@ function whichday(time) {
     var time_day = time.getDate();
     var now_year = now.getFullYear();
     var time_year = now.getFullYear();
-    // alert(now_day);
-    // alert(time_day);
     if (now_day == time_day) {
         return '今天'
     } else if (now_year == time_year) {
@@ -266,9 +311,9 @@ function float2int(f) {
 
 <div id="vm" class="uk-container uk-container-center uk-margin-large">
     <div class="uk-container uk-container-center uk-width-4-5">
-    <div class="uk-block-primary uk-contrast uk-margin">
+    <div class="uk-block-primary uk-contrast uk-margin" :style="{ background: themecolor[0] }">
         <div class="uk-container uk-vertical-align" style="height: 40px;">
-        <div class="uk-vertical-align-middle uk-width-1-2">黑色沙漠日服BOSS预报系统 Ver 0.9</div>
+        <div class="uk-vertical-align-middle uk-width-1-2">黑色沙漠日服 天气预报系统 Ver 0.99 <b><span v-text="timezonestring"></span></b></div>
         <div class="uk-vertical-align-bottom uk-width-1-2" align="right">By Makiko</div>
         <!-- <div class="uk-vertical-align-bottom uk-width-1-2"><img src="/static/imgs/signature.png" align="right"></div> -->
         </div>
@@ -304,11 +349,7 @@ function float2int(f) {
     </div>
 
     <div class="uk-container uk-container-center uk-width-4-5">
-
-
-
-
-        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center uk-vertical-align" v-if="loading" style="height: 225px"> 
+        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center uk-vertical-align" v-if="loading" style="height: 225px" :style="{ background: themecolor[1], color:themecolor[2] }"> 
             <div class="uk-vertical-align-middle">
                 <p>Loading...</p>
                 <p><div v-text="loadingjoke"></div></p>
@@ -323,8 +364,10 @@ function float2int(f) {
                             <td>预计下次最早出现</td>
                             <td>当前出现概率</td>
                         </tr>
-                        <tr v-for="boss in bosses">
-                            <td v-text="boss[0]" :class="bosscolor(probability(boss))"></td>
+                        <tr v-for="(boss, index) in bosses">
+                            <td>
+                                <a v-text="boss[0]" :class="bosscolor(probability(boss))" :href="whichdialog(index)" data-uk-modal></a>
+                            </td>
                             <td v-text="boss[4]"></td>
                             <td v-text="boss[5]"></td>
                             <td v-text="probability(boss).toFixed(2) + '%'"></td>
@@ -335,7 +378,7 @@ function float2int(f) {
         <div class="uk-container-center uk-text-center uk-width-4-5">
 
 
-                <button @click="refresh" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0">
+                <button @click="refresh" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0" :style="{ background: themecolor[0] }">
                     <i class="uk-icon-refresh"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
                 </button>
 
@@ -352,7 +395,7 @@ function float2int(f) {
 
     <div class="uk-container uk-container-center uk-width-4-5 uk-margin">
         <!-- <hr> -->
-    <div class="uk-block uk-block-primary uk-padding-vertical-remove uk-contrast">
+    <div class="uk-block uk-block-primary uk-padding-vertical-remove uk-contrast" :style="{ background: themecolor[0] }">
 
                                 <div class="uk-container  uk-text-center">
 
@@ -385,9 +428,171 @@ function float2int(f) {
 
                             </div>
     </div>
+</div>
+
+<div id="modalnube" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                            <div class="uk-modal-dialog uk-modal-dialog-blank">
+                                <button class="uk-modal-close uk-close" type="button"></button>
+                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/nubel.jpg');"></div>
+                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                                    <h1>努贝尔</h1>
+                                    <br>
+                                        <div class="uk-width-medium-2-3">
+                                            <h3>由来</h3>
+                                            <p>
+                                            某日，巴伦西亚沙漠卷起了巨大的沙暴。沙暴在沙漠中是常见的自然现象，然而这次却不同。人们见到了前所未闻见所未见的超大规模的沙暴。时光流逝，一本被埋入沙漠的冒险者日记记录了那场沙暴的原因。饱经岁月冲刷的日记中，冒险者记载他在沙暴中发现了巨大的影子。从此人们便以冒险者之名：努贝尔，来称呼那团巨大的阴影。</p>
+                                            <br>
+                                            <h3>掉落</h3>
+
+                                            <p>
+                                                <table class="uk-table">
+                                                    <tr>
+                                                        <td>各职业最强<b>攻击向</b>副手武器的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/13138/"><img src="/static/imgs/bossweapon/1.png" alt="ヌーベルボウ"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>努贝尔的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42436/"><img src="/static/imgs/bossweapon/00042436.png"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>金块</td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                </table>
+
+                                            </p>
+                                            <br>
+                                            <h3>地点</h3>
+                                            <p>沙漠入口据点【沙砾市场】4点钟方向</p>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+<div id="modalkutu" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                            <div class="uk-modal-dialog uk-modal-dialog-blank">
+                                <button class="uk-modal-close uk-close" type="button"></button>
+                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/kutumu.jpg');"></div>
+                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                                    <h1>库图姆</h1>
+                                    <br>
+                                        <div class="uk-width-medium-2-3">
+                                            <h3>由来</h3>
+                                            <p>古代生命体，以蠕虫的形态出现。能够驱动它的唯有体内镶嵌的古代碎片的心脏。古书记载，曾有栖息着库图姆的名为赤沙石室曾出现过。某一日，库图姆突然停止了活动，石室也随之关闭。很长的一段历史当中，连这处地方都被人遗忘了。然而最近，人们开始听见库图姆心脏的鼓动声，考古学家也发现了石室的入口。</p>
+                                            <br>
+                                            <h3>掉落</h3>
+
+                                            <p>
+                                                <table class="uk-table">
+                                                    <tr>
+                                                        <td>各职业最强<b>防御向</b>副手武器的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/10140/"><img src="/static/imgs/bossweapon/2.png" ></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>库图姆的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42450/"><img src="/static/imgs/bossweapon/00042450.png"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>金块</td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                </table>
+
+                                            </p>
+                                            <br>
+                                            <h3>地点</h3>
+                                            <p>沙漠入口11点钟方向据点<b>赤色石室</b>据点深处的大厅</p>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+</div>
+<div id="modalkuza" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                            <div class="uk-modal-dialog uk-modal-dialog-blank">
+                                <button class="uk-modal-close uk-close" type="button"></button>
+                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/kuzaka.jpg');"></div>
+                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                                    <h1>库扎卡</h1>
+                                        <br>
+                                        <div class="uk-width-medium-2-3">
+                                            <h3>由来</h3>
+                                            <p>掌握与神匹敌的破坏力的腐坏君主库扎卡在数百年前被圣职者们封印了起来。被封印的库扎卡被塞琳迪亚秘密管理于神殿，但因与巴伦西亚帝国战争败北，被神秘集团钻空，神殿被占领。为此海德尔城数度派兵尝试收复，但每每失败，与集团的神殿争夺呈焦灼状态。</p>
+                                            <br>
+                                            <h3>掉落</h3>
+
+                                            <p>
+                                                <table class="uk-table">
+                                                    <tr>
+                                                        <td>各职业最强<b>主手武器</b>的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/14410/"><img src="/static/imgs/bossweapon/3.png" alt="ヌーベルボウ"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>库扎卡的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42435/"><img src="/static/imgs/bossweapon/00042435.png"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>金块</td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                </table>
+
+                                            </p>
+                                            <br>
+                                            <h3>地点</h3>
+                                            <p>海德尔城南面<b>塞琳迪亚神殿</b>据点深处的神殿大厅</p>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+<div id="modalkara" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                            <div class="uk-modal-dialog uk-modal-dialog-blank">
+                                <button class="uk-modal-close uk-close" type="button"></button>
+                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/karanda.jpg');"></div>
+                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                                    <h1>卡兰达</h1>
+
+                                        <br>
+                                        <div class="uk-width-medium-2-3">
+                                            <h3>由来</h3>
+                                            <p>哈耳庇厄的领主。完全实行集体生活的耳庇厄将族群中最强的雌性选出来做为自己的领主，称为卡兰达。学者推测，选出最强雌性的目的是为了让整个族群只与卡兰达交配产卵，保持族群战斗力。这可能也是族群中的哈耳庇厄向卡兰达保持绝对忠诚的原因</p>
+                                            <br>
+                                            <h3>掉落</h3>
+
+                                            <p>
+                                                <table class="uk-table">
+                                                    <tr>
+                                                        <td>各职业最强<b>觉醒武器</b>的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/14782/"><img src="/static/imgs/bossweapon/4.png" ></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>卡兰达的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42437/"><img src="/static/imgs/bossweapon/00042437.png"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>金块</td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                </table>
+
+                                            </p>
+                                            <br>
+                                            <h3>地点</h3>
+                                            <p>东西部交界有鸟人的城堡12点钟方向据点<b>卡兰达山脊</b>据点</p>
 
 
 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 </div>
 
 

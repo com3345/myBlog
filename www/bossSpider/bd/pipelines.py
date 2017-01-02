@@ -12,7 +12,7 @@ from scrapy.exceptions import DropItem
 
 P_NUBE = "ぬ|ヌ|nube|nu"  # 1
 P_KUTUMU = "くつ|クツ|kutu|靴"  # 2
-P_KUZAKA = "くざ|クザカ|kuza"  # 3
+P_KUZAKA = "くざ|クザカ|kuza|クサ"  # 3
 P_KARANDA = "カランダ|kara"  # 4
 
 
