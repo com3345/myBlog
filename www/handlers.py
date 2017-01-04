@@ -58,6 +58,20 @@ def random_line(afile):
     return line
 
 
+@get('/api/get_presentcode')
+def api_get_presentcode():
+    if os.path.exists("/static/presentcodes.json"):
+        run("rm presentcodes.json", shell=True)
+
+    run("scrapy crawl presentcodespider -o ../static/presentcodes.json", shell=True, cwd="./presentcodeSpider")
+    with open("/static/presentcodes.json") as data_file:
+        data = json.load(data_file)
+    # run("rm presentcode.json", shell=True)
+    codes = {idx: code for (idx, code) in enumerate(data)}
+    logging.info(codes)
+    return codes
+
+
 @get('/api/get_joke')
 def api_get_joke():
     file_path = './static/joke001.txt'
@@ -78,7 +92,7 @@ def api_crawl_boss():
     run("scrapy crawl bdspider -o ../bossinfo.json", shell=True, cwd="./bossSpider")
     with open("bossinfo.json") as data_file:
         data = json.load(data_file)
-    run("rm bossinfo.json", shell=True)
+    # run("rm bossinfo.json", shell=True)
 
     bosses = [(
         el["boss"],
@@ -86,7 +100,7 @@ def api_crawl_boss():
         el["last_time"],
         el["last_time"] + timedelta(hours=BOSS_CD[el["boss"]][1]).total_seconds(),
         BOSS_CD[el["boss"]][2]) for el in data]
-    logging.info({boss[0]: boss[1:] for boss in bosses})
+    # logging.info({boss[0]: boss[1:] for boss in bosses})
     return {boss[0]: boss[1:] for boss in bosses}
 
 

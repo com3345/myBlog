@@ -8,6 +8,7 @@ import re
 from datetime import datetime
 from .items import BdItem
 from scrapy.exceptions import DropItem
+# import logging
 
 
 P_NUBE = "ぬ|ヌ|nube|nu"  # 1
@@ -76,7 +77,7 @@ class BdPipeline(object):
         if findbosstype(item['title']):
             item["boss"] = findbosstype(item['title'])
         elif findbosstype(item['content']):
-            item["boss"] = findbosstype(item["title"])
+            item["boss"] = findbosstype(item["content"])
         else:
             raise DropItem()
 

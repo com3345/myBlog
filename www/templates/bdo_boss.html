@@ -12,512 +12,288 @@
     <script src="/static/js/uikit.min.js"></script>
     <script src="/static/js/vue.js"></script>
     <script src="/static/js/myBlog.js"></script>
+    <script src="/static/js/bdoboss.js"></script>
+    <script src="/static/js/components/slideshow.js"></script>
+    <link rel="stylesheet" href="/static/css/components/slideshow.min.css" />
+    <link rel="stylesheet" href="/static/css/components/slidenav.css" />
+    <script src="/static/js/sitesList.js"></script>
+
 <!--     <link type="text/css" rel="stylesheet" href="/static/css/jquery.qtip.min.css">
 
     <script type="text/javascript" src="/static/js/jquery.qtip.min.js"></script>
     <script type="text/javascript" src="/static/js/tooltips.min.js"></script> -->
-<style type="text/css">
-a:link {
-    color: SlateGrey;}
-</style>
-<script>
+    <style type="text/css">
+        a {
+            color: SlateGrey;}
+            .muted-link {
+                color: SlateGrey;
+                text-decoration: none;
+            }
+        </style>
+    </head>
 
-$(function() {
-    new Clipboard('.btn');
-    var themecolorlist = [
-        ["linear-gradient(to right, #ccccff 0%, #ff99cc 100%)","rgba(255, 153, 204, 0.05)", "rgba(255, 153, 204, 0.85)"],
-        ["linear-gradient(to right, #99ff33 0%, #66ccff 100%)", "rgba(102, 204, 255, 0.05)", "rgba(102, 204, 255, 0.85)"],
-        ["linear-gradient(to right, #ff9900 0%, #ff0000 100%)", "rgba(255, 0, 0, 0.05)", "rgba(255, 0, 0, 0.85)"],
-        ["rgb(84, 132, 164)", "rgba(84, 132, 164, 0.05)", "rgb(84, 132, 164, 0.85)"],
-        ["rgb(246, 209, 85)", "rgba(246, 209, 85, 0.05)", "rgba(246, 209, 85, 0.85)"],
-        ["rgb(0, 75, 141)", "rgba(0, 75, 141, 0.05)", "rgba(0, 75, 141, 0.85)"],
-        ["rgb(242, 85, 44)", "rgba(242, 85, 44, 0.05)", "rgba(242, 85, 44, 0.85)"],
-        ["rgb(149, 222, 227)", "rgba(149, 222, 227, 0.05)", "rgba(149, 222, 227, 0.85)"],
-        ["rgb(237, 205, 194)", "rgba(237, 205, 194, 0.05)", "rgba(237, 205, 194, 0.85)"],
-        ["rgb(136, 176, 75)", "rgba(136, 176, 75, 0.05)", "rgba(136, 176, 75, 0.85)"],
-        ["rgb(206, 49, 117)", "rgba(206, 49, 117, 0.05)", "rgba(206, 49, 117, 0.85)"],
-        ["rgb(90, 114, 71)", "rgba(90, 114, 71, 0.05)", "rgba(90, 114, 71, 0.85)"],
-        ["rgb(207, 176, 149)", "rgba(207, 176, 149, 0.05)", "rgba(207, 176, 149, 0.85)"]
-    ];
-    var vm = new Vue({
-        el: '#vm',
-        data: {
-            timerforautorefresh: 0,
-            timerforrefreshbutton: 20,
-            firstloading: true,
-            loading: true,
-            now: new Date(),
-            bdnow: [],
-            loadingjoke: '',
-            nextnight: 0,
-            leftnight: 0,
-            bosses: {
-                nube: [],
-                kutu: [],
-                kuza: [],
-                kara: []
-            },
-        },
-        mounted: function (){
-            this.get_joke();
-            this.refresh();
-            this.firstloading = false;
-            setInterval(this.clock, 1000)
-        },
-        computed: {
-            themecolor: function () {
+    <body>
+        <div></div>
 
-                return themecolorlist[Math.floor(Math.random() * themecolorlist.length)]
-            },
-
-
-            night: function () {
-                var res = true;
-                var timez_shift_to_Jp = 9 + this.now.getTimezoneOffset() / 60;
-                var now_h = this.now.getHours() + timez_shift_to_Jp ;
-
-                var now_m = this.now.getMinutes();
-                var minutes = now_h * 60 + now_m;  // 0 ~ 1440 从现实世界0点开始到现在的分钟数
-
-                if (minutes > 0 && minutes <= 40) {
-                    // 白天 现实世界0点～0:40的游戏白天
-                    res = false;
-                    this.nextnight = 40 - minutes
-                    this.bdnow[0] = float2int(((160 + minutes) * 4.5) / 60) + 7;
-                    this.bdnow[1] = float2int(((160 + minutes) * 4.5) % 60);
-                } else if (minutes > 1280 && minutes <= 1440) {
-                    // 白天 现实世界21:20~0点的游戏白天
-                    res = false;
-                    this.nextnight = 1480 - minutes;
-                    this.bdnow[0] = float2int(((minutes - 1280) * 4.5) / 60) + 7;
-                    this.bdnow[1] = float2int(((minutes - 1280) * 4.5) % 60);
-
-                } else {
-                    // alert(minutes);
-                    var rem = (minutes - 40) % 240; // 超过游戏每个夜昼循环循环开始的真实世界分钟数
-
-                    if (rem >= 40 ) {
-                        // 白天
-                        res = false;
-                        this.nextnight = 240 - rem;
-                        this.bdnow[0] = float2int(((rem - 40)* 4.5) / 60) + 7; // 7点开始算
-                        this.bdnow[1] = float2int(((rem - 40)* 4.5) % 60);
-
-                    } else {
-                        // 夜里
-                        res = true;
-                        this.nextnight = 0;
-                        this.nightleft = 40 - rem;
-                        this.bdnow[0] = float2int(((rem) * 13.5) / 60) + 22; // 22点开始算
-                        if (this.bdnow[0] >= 24) {
-                            this.bdnow[0] -= 24
-                        }
-                        this.bdnow[1] = float2int(((rem) * 13.5) % 60);
-                    }
-                }
-                return res
-            },
-            timezonestring: function () { 
-                var timezoneoffset = this.now.getTimezoneOffset() / 60 ;
-                var timezone = '';
-                if (timezoneoffset == -9) {
-                    timezone = '东京时间'
-                } else if (timezoneoffset == -8) {
-                    timezone = '北京时间'
-                } else if (timezone >= 0) {
-                    timezone = timezoneoffset.toString() + '时区时间'
-                } else {
-                    timezone = (- timezoneoffset).toString() + '时区时间'
-                }
-                return timezone
-            },
-
-            data2clipboard: function () {
-                var text = '';
-
-                text += '以下皆为 ' + this.timezonestring + '\n';
-                text += '[龙]:上次' + this.bosses.nube[4] + ', 预计' + this.bosses.nube[5] + '\n';
-                text += '[虫]:上次' + this.bosses.kutu[4] + ', 预计' + this.bosses.kutu[5] + '\n';
-                text += '[库]:上次' + this.bosses.kuza[4] + ', 预计' + this.bosses.kuza[5] + '\n';
-                text += '[鸟]:上次' + this.bosses.kara[4] + ', 预计' + this.bosses.kara[5] + '\n';
-                text += 'Ps:(预计)指本次最早可能出现的时间\n';
-                // text += '游戏夜晚信息:'
-                if (this.nextnight > 0) {
-                    text += '距游戏内夜晚 降临 还有' + this.nextnight.toString() + '分钟.';
-                } else {
-                    text += '离游戏内夜晚 结束 还有' + this.nightleft.toString() + '分钟';
-                }
-                text += '\n该信息由黑色沙漠天气预报系统提供\n访问http://hazydawn.com/bdo_boss';
-
-                return text
-            },
-            showloading: function () 
-            {
-                var res = false;
-                if (this.firstloading) {
-                    if (this.loading) {
-                        res = true;
-                    } else {
-                        res = false;
-                    }
-                } else {
-                    if (this.timerforrefreshbutton > 15) {
-                        res = true;
-                    } else {
-                        res = false;
-                    }
-                }
-                return res
-            },
-        },
-
-
-
-        methods: {
-            refresh: function() {
-                    this.get_joke();
-                    this.loading = true;
-                    this.timerforautorefresh = 0;
-                    this.timerforrefreshbutton = 20;
-                    getJSON('/api/crawl_boss', 
-                    function(err, result) {
-                    if (err) {
-                        alert('ERROR: Refresh too often!');
-                    }
-                    else {
-                        vm.bosses.nube = result.nube;
-                        vm.bosses.kutu = result.kutu;
-                        vm.bosses.kuza = result.kuza;
-                        vm.bosses.kara = result.kara;
-
-                        vm.loading = false;
-                        for (b in vm.bosses) {
-                            format_time(vm.bosses[b]);
-                        }
-                    }
-                    });
-
-            },
-
-            get_joke: function () {
-                    getJSON('/api/get_joke',
-                    function (err, result) {
-                        
-                        if (err) {
-                            alert('ERROR:我们没有笑话了！');
-                        } else {
-                            if (result.joke.indexOf('$$$') > -1 ) {
-                                vm.loadingjoke = result.joke.split()
-                            }
-                            vm.loadingjoke = result.joke;
-                        }
-                    });
-            },
-
-            clock: function() {
-                this.now = new Date();
-                this.timerforautorefresh += 1;
-                this.timerforrefreshbutton -= 1;
-                if (this.timerforautorefresh > 60) {
-
-                    this.refresh()
-                }
-            },
-            probability: function(boss) {
-
-                nextdate = str2time(boss[2]);
-                var prob = '';
-
-                if (vm.now < nextdate) {
-
-                    prob = 0
-                } else {
-                    prob = (this.now - nextdate) / (3600 * boss[3] * 1000) * 100
-                }
-                return prob
-            },
-            bosscolor: function(prob) {
-                var c = '';
-                if (prob < 25 && prob > 0) {
-                    c = 'uk-text-primary'
-                } else if (prob < 50 && prob >= 25) {
-                    c = 'uk-text-success'
-                } else if (prob < 75 && prob >= 50) {
-                    c = 'uk-text-warning'
-                } else if (prob >= 75) {
-                    c = 'uk-text-danger'
-                }
-                return c
-            },
-            whichdialog: function (index) {
-                return "#modal" + index.toString()
-            },
-        },
-    });
-});
-
-
-
-function format_time(boss){
-    lastdate = str2time(boss[1]);
-    nextdate = str2time(boss[2]);
-    boss.push(whichday(lastdate) + ' ' + time2hourminute(lastdate));
-
-    if (nextdate.getDay() == 3 && nextdate.getHours() > 6) {    
-        boss.push('周三维护作息紊乱')
-    } else {
-        boss.push(whichday(nextdate) + ' ' + time2hourminute(nextdate));
-    }
-    boss.push(0)
-}
-
-function whichday(time) {
-    var now = new Date();
-    var now_day = now.getDate();
-    var time_day = time.getDate();
-    var now_year = now.getFullYear();
-    var time_year = now.getFullYear();
-    if (now_day == time_day) {
-        return '今天'
-    } else if (now_year == time_year) {
-        if (now_day < time_day) {
-            return '明天'
-        } else {
-            return '昨天'
-        }
-    } else if (now_year < time_year) {
-        return '明天'
-    } else {
-        return '昨天'
-    }
-}
-
-function str2time(t) {
-    return new Date(t * 1000)
-}
-
-function time2hourminute(t) {
-    return t.toTimeString().split(' ')[0].slice(0, 5)
-}
-
-function float2int(f) {
-    return f | 0
-}
-
-</script>
-
-<body>
-<div></div>
-
-<div id="vm" class="uk-container uk-container-center uk-margin-large">
-    <div class="uk-container uk-container-center uk-width-4-5">
-    <div class="uk-block-primary uk-contrast uk-margin" :style="{ background: themecolor[0] }">
-        <div class="uk-container uk-vertical-align" style="height: 40px;">
-        <div class="uk-vertical-align-middle uk-width-1-2">黑色沙漠日服 天气预报系统 Ver 0.99 <b><span v-text="timezonestring"></span></b></div>
-        <div class="uk-vertical-align-bottom uk-width-1-2" align="right">By Makiko</div>
-        <!-- <div class="uk-vertical-align-bottom uk-width-1-2"><img src="/static/imgs/signature.png" align="right"></div> -->
-        </div>
-    </div>
-    </div>
-
-
-    <div class="uk-container uk-container-center uk-width-4-5">
-        <div class="uk-width-1-2">
-        <table class="uk-table uk-table-striped uk-text-center">
-        
-            <tbody>
-                <tr class="uk-text-bold">
-                    <td>现实时间</td>
-                    <td>黑沙时间</td>
-                    <td>黑商情报</td>
-                </tr>
-                <tr>
-                    <td v-text="now.toTimeString().split(' ')[0]"></td>
-                    <td>
-                        <span v-if="night">夜里</span>
-                        <span v-else>白天</span>
-                        <span v-text="bdnow[0].toString() + ':' + bdnow[1].toString()"></span>
-                    </td>
-                    <td> 
-                        <span v-if="nextnight > 0" v-text="nextnight.toString() + ' 分钟后出现'"></span>
-                        <span v-else v-text="nightleft.toString() + ' 分钟后消失'"></span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        </div>
-    </div>
-
-    <div class="uk-container uk-container-center uk-width-4-5">
-        <div class="uk-panel uk-panel-box uk-panel-box-primary uk-width-1-1 uk-container-center uk-text-center uk-vertical-align" v-if="loading" style="height: 225px" :style="{ background: themecolor[1], color:themecolor[2] }"> 
-            <div class="uk-vertical-align-middle">
-                <p>Loading...</p>
-                <p><div v-text="loadingjoke"></div></p>
+        <div id="vm" class="uk-container uk-container-center uk-margin-large">
+            <div class="uk-container uk-container-center uk-width-4-5">
+                <div class="uk-block-primary uk-contrast uk-margin" :style="{ background: themecolor[0] }">
+                    <div class="uk-container uk-vertical-align" style="height: 40px;">
+                        <div class="uk-vertical-align-middle uk-width-2-5">黑色沙漠日服 天气预报系统 Ver 0.99</div>
+                        <div class="uk-vertical-align-middle uk-width-2-5"><b><span v-text="timezonestring"></span></b></div>
+                        <div class="uk-vertical-align-bottom uk-width-1-5" align="right">By Makiko</div>
+                        <!-- <div class="uk-vertical-align-bottom uk-width-1-5"><img src="/static/imgs/signature.png" align="right"></div> -->
+                    </div>
+                </div>
             </div>
-        </div>
-        <div v-else>
-                <table class="uk-table uk-table-striped uk-text-center">
-                    <tbody>
-                        <tr class="uk-text-bold">
-                            <td></td>
-                            <td>最后一次出现</td>
-                            <td>预计下次最早出现</td>
-                            <td>当前出现概率</td>
-                        </tr>
-                        <tr v-for="(boss, index) in bosses">
-                            <td>
-                                <a v-text="boss[0]" :class="bosscolor(probability(boss))" :href="whichdialog(index)" data-uk-modal></a>
-                            </td>
-                            <td v-text="boss[4]"></td>
-                            <td v-text="boss[5]"></td>
-                            <td v-text="probability(boss).toFixed(2) + '%'"></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-        <div class="uk-container-center uk-text-center uk-width-4-5">
 
 
-                <button @click="refresh" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0" :style="{ background: themecolor[0] }">
-                    <i class="uk-icon-refresh"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
-                </button>
+            <div class="uk-container uk-container-center uk-width-4-5">
+                <div class="uk-grid">
+                    <div class="uk-width-3-5">
+                        <table class="uk-table uk-table-striped uk-text-center">
 
+                            <tbody>
+                                <tr class="uk-text-bold">
+                                    <td>现实时间</td>
+                                    <td>黑沙时间</td>
+                                    <td>黑商情报</td>
+                                </tr>
+                                <tr>
+                                    <td v-text="now.toTimeString().split(' ')[0]"></td>
+                                    <td>
+                                        <span v-if="night">夜里</span>
+                                        <span v-else>白天</span>
+                                        <span v-text="bdnow[0].toString() + ':' + bdnow[1].toString()"></span>
+                                    </td>
+                                    <td> 
+                                        <span v-if="nextnight > 0" v-text="nextnight.toString() + ' 分钟后出现'"></span>
+                                        <span v-else v-text="nightleft.toString() + ' 分钟后消失'"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-    <!-- Target -->
-                <button class="uk-button uk-button uk-width-1-3 btn" :data-clipboard-text="data2clipboard">
-                <i class="uk-icon-share"></i> 复制到剪贴板
-                </button>
+                    <div class="uk-width-2-5">
+                        <div v-if="presentcodes.length > 0">
+                            <div v-for="(code, index) in presentcodes">
+                                <div v-if="index == codeslidenumber" class="uk-grid">
 
+                                        <div :class="[presentcodes.length > 1 ? 'uk-width-5-6': 'uk-width-1-1']" >
+                                            <table class="uk-table uk-table-striped uk-text-center" >
+                                                <tbody>
+                                                    <tr>
+                                                        <!-- <td>礼物代码:</td> -->
+                                                        <td><a href="http://blackdesert.pmang.jp/serial_code/new" target="_blank"　v-text="code.presentcode.split(' - ')[0]" class="btn muted-link" :data-clipboard-text="copied_codeslice" @click="set_copied_codeslice"></a></td>
+                                                        <td>-</td>
+                                                        <td><a href="#" v-text="code.presentcode.split(' - ')[1]" class="btn muted-link" :data-clipboard-text="copied_codeslice" @click="set_copied_codeslice"></a></td>
+                                                        <td>-</td>
+                                                        <td><a href="#" v-text="code.presentcode.split(' - ')[2]" class="btn muted-link" :data-clipboard-text="copied_codeslice" @click="set_copied_codeslice"></a></td>
+                                                    </tr>
 
-        </div>
-        </div>
-    </div>
+                                                    <tr>
+                                                        <td colspan="5" v-text="code.timestr"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
 
-    <div class="uk-container uk-container-center uk-width-4-5 uk-margin">
-        <!-- <hr> -->
-    <div class="uk-block uk-block-primary uk-padding-vertical-remove uk-contrast" :style="{ background: themecolor[0] }">
-
-                                <div class="uk-container  uk-text-center">
-
-                                    <!-- <h3>Links</h3> -->
-
-                                    <div class="uk-grid uk-grid-match" data-uk-grid-margin="">
-                                        <div class="uk-width-medium-1-3 uk-row-first">
-                                            <!-- <h3>Links</h3> -->
-                                            <div class="uk-panel">
-                                                <!-- <h4>Links</h4> -->
-                                                <p>
-                                                    <a href="http://bddatabase.net/jp/" target="_blank">BDO 数据库(日文/英文)</a>
-                                                </p>
+                                        <div class="uk-width-1-6 uk-vertical-align" v-if="presentcodes.length > 1" style="height: 60px">
+                                            <div class="uk-vertical-align-middle">
+                                                <a href="#" class="uk-icon-hover uk-icon-arrow-circle-right uk-icon-medium" @click="cal_codeslidenumber"></a>
                                             </div>
                                         </div>
-                                        <div class="uk-width-medium-1-3">
-                                            <div class="uk-panel">
-                                            <p>
-    <a href="http://blackdesert.swiki.jp/index.php?知識%2F地形" target="_blank">知识任务wiki(日文)</a></p>
-                                            </div>
-                                        </div>
-                                        <div class="uk-width-medium-1-3">
-                                            <div class="uk-panel">
-                                                <p><a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=09ec745b2da93febe556df17baf0bf0916df97a8f19bfe7ba897cd7bc47828fd"><i class="uk-icon-qq"> 日服群</i></a></p>
-                                            </div>
-                                        </div>
-                                    </div>
 
                                 </div>
 
                             </div>
-    </div>
-</div>
+                        </div>
 
-<div id="modalnube" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
-                            <div class="uk-modal-dialog uk-modal-dialog-blank">
-                                <button class="uk-modal-close uk-close" type="button"></button>
-                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
-                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/nubel.jpg');"></div>
-                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
-                                    <h1>努贝尔</h1>
-                                    <br>
-                                        <div class="uk-width-medium-2-3">
-                                            <h3>由来</h3>
-                                            <p>
-                                            某日，巴伦西亚沙漠卷起了巨大的沙暴。沙暴在沙漠中是常见的自然现象，然而这次却不同。人们见到了前所未闻见所未见的超大规模的沙暴。时光流逝，一本被埋入沙漠的冒险者日记记录了那场沙暴的原因。饱经岁月冲刷的日记中，冒险者记载他在沙暴中发现了巨大的影子。从此人们便以冒险者之名：努贝尔，来称呼那团巨大的阴影。</p>
-                                            <br>
-                                            <h3>掉落</h3>
+                        <div v-else>
+                            <div class="uk-width-1-1">
+                                <table class="uk-table uk-table-striped uk-text-center" >
+                                    <tbody>
+                                        <tr><td>近期无可用礼物代码,但有<td></tr>
+                                        <tr><td><!-- <a :href="search_query" target="_blank"  @click="set_search_query" class="muted-link">i-remember.fr</a>  --><a target="_blank" :href="random_link" @click="set_random_link">神秘去处</a></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
 
-                                            <p>
-                                                <table class="uk-table">
-                                                    <tr>
-                                                        <td>各职业最强<b>攻击向</b>副手武器的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/13138/"><img src="/static/imgs/bossweapon/1.png" alt="ヌーベルボウ"></a></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>努贝尔的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42436/"><img src="/static/imgs/bossweapon/00042436.png"></a></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>金块</td>
-                                                        <td></td>
-                                                    </tr>
+            <div class="uk-container uk-container-center uk-width-4-5">
+                <div class="uk-panel uk-panel-box uk-panel-box-primary uk-container-center uk-text-center uk-vertical-align" v-if="bossinfoloading" style="height: 195px" :style="{ background: themecolor[1], color:themecolor[2] }"> 
+                    <div class="uk-vertical-align-middle">
+                        <p>Loading...</p>
+                        <p><div v-text="loadingjoke"></div></p>
+                    </div>
+                </div>
+                <div v-else>
+                    <table class="uk-table uk-table-striped uk-text-center">
+                        <tbody>
+                            <tr class="uk-text-bold">
+                                <td></td>
+                                <td>最后一次出现</td>
+                                <td>预计下次最早出现</td>
+                                <td>当前出现概率</td>
+                            </tr>
+                            <tr v-for="(boss, index) in bosses">
+                                <td>
+                                    <a v-text="boss[0]" :class="bosscolor(probability(boss))" :href="whichdialog(index)" data-uk-modal></a>
+                                </td>
+                                <td v-text="boss[4]"></td>
+                                <td v-text="boss[5]"></td>
+                                <td v-text="probability(boss).toFixed(2) + '%'"></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                                                </table>
-
-                                            </p>
-                                            <br>
-                                            <h3>地点</h3>
-                                            <p>沙漠入口据点【沙砾市场】4点钟方向</p>
+                    <div class="uk-container-center uk-text-center uk-width-4-5">
 
 
-                                        </div>
+                        <button @click="refreshbossinfo" class="uk-button uk-button-primary uk-width-1-3" :disabled="timerforrefreshbutton > 0" :style="{ background: themecolor[0] }">
+                            <i class="uk-icon-refresh"></i> 刷新 <span v-text="timerforrefreshbutton" v-show="timerforrefreshbutton > 0"></span>
+                        </button>
+
+
+                        <!-- Target -->
+                        <button class="uk-button uk-button uk-width-1-3 btn" :data-clipboard-text="data2clipboard">
+                            <i class="uk-icon-share"></i> 复制到剪贴板
+                        </button>
+
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="uk-container uk-container-center uk-width-4-5 uk-margin">
+                <!-- <hr> -->
+                <div class="uk-block uk-block-primary uk-padding-vertical-remove uk-contrast" :style="{ background: themecolor[0] }">
+
+                    <div class="uk-container  uk-text-center">
+
+                        <!-- <h3>Links</h3> -->
+
+                        <div class="uk-grid uk-grid-match" data-uk-grid-margin="">
+                            <div class="uk-width-medium-1-3 uk-row-first">
+                                <!-- <h3>Links</h3> -->
+                                <div class="uk-panel">
+                                    <!-- <h4>Links</h4> -->
+                                    <p>
+                                        <a href="http://bddatabase.net/jp/" target="_blank">BDO 数据库(日文/英文)</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="uk-width-medium-1-3">
+                                <div class="uk-panel">
+                                    <p>
+                                        <a href="http://blackdesert.swiki.jp/index.php?知識%2F地形" target="_blank">知识任务wiki(日文)</a></p>
                                     </div>
+                                </div>
+                                <div class="uk-width-medium-1-3">
+                                    <div class="uk-panel">
+                                        <p><a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=09ec745b2da93febe556df17baf0bf0916df97a8f19bfe7ba897cd7bc47828fd"><i class="uk-icon-qq"> 日服群</i></a></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="modalnube" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                <div class="uk-modal-dialog uk-modal-dialog-blank">
+                    <button class="uk-modal-close uk-close" type="button"></button>
+                    <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                        <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/nubel.jpg');"></div>
+                        <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                            <h1>努贝尔</h1>
+                            <br>
+                            <div class="uk-width-medium-2-3">
+                                <h3>由来</h3>
+                                <p>
+                                    某日，巴伦西亚沙漠卷起了巨大的沙暴。沙暴在沙漠中是常见的自然现象，然而这次却不同。人们见到了前所未闻见所未见的超大规模的沙暴。时光流逝，一本被埋入沙漠的冒险者日记记录了那场沙暴的原因。饱经岁月冲刷的日记中，冒险者记载他在沙暴中发现了巨大的影子。从此人们便以冒险者之名：努贝尔，来称呼那团巨大的阴影。</p>
+                                    <br>
+                                    <h3>掉落</h3>
+
+                                    <p>
+                                        <table class="uk-table">
+                                            <tr>
+                                                <td>各职业最强<b>攻击向</b>副手武器的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/13138/"><img src="/static/imgs/bossweapon/1.png" alt="ヌーベルボウ"></a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>努贝尔的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42436/"><img src="/static/imgs/bossweapon/00042436.png"></a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>金块</td>
+                                                <td></td>
+                                            </tr>
+
+                                        </table>
+
+                                    </p>
+                                    <br>
+                                    <h3>地点</h3>
+                                    <p>沙漠入口据点【沙砾市场】4点钟方向</p>
+
+
                                 </div>
                             </div>
                         </div>
-<div id="modalkutu" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
-                            <div class="uk-modal-dialog uk-modal-dialog-blank">
-                                <button class="uk-modal-close uk-close" type="button"></button>
-                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
-                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/kutumu.jpg');"></div>
-                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                    </div></div>
+                    <div id="modalkutu" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                        <div class="uk-modal-dialog uk-modal-dialog-blank">
+                            <button class="uk-modal-close uk-close" type="button"></button>
+                            <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                                <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/kutumu.jpg');"></div>
+                                <div class="uk-width-medium-2-5" style="opacity: 0.7">
                                     <h1>库图姆</h1>
                                     <br>
-                                        <div class="uk-width-medium-2-3">
-                                            <h3>由来</h3>
-                                            <p>古代生命体，以蠕虫的形态出现。能够驱动它的唯有体内镶嵌的古代碎片的心脏。古书记载，曾有栖息着库图姆的名为赤沙石室曾出现过。某一日，库图姆突然停止了活动，石室也随之关闭。很长的一段历史当中，连这处地方都被人遗忘了。然而最近，人们开始听见库图姆心脏的鼓动声，考古学家也发现了石室的入口。</p>
-                                            <br>
-                                            <h3>掉落</h3>
+                                    <div class="uk-width-medium-2-3">
+                                        <h3>由来</h3>
+                                        <p>古代生命体，以蠕虫的形态出现。能够驱动它的唯有体内镶嵌的古代碎片的心脏。古书记载，曾有栖息着库图姆的名为赤沙石室曾出现过。某一日，库图姆突然停止了活动，石室也随之关闭。很长的一段历史当中，连这处地方都被人遗忘了。然而最近，人们开始听见库图姆心脏的鼓动声，考古学家也发现了石室的入口。</p>
+                                        <br>
+                                        <h3>掉落</h3>
 
-                                            <p>
-                                                <table class="uk-table">
-                                                    <tr>
-                                                        <td>各职业最强<b>防御向</b>副手武器的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/10140/"><img src="/static/imgs/bossweapon/2.png" ></a></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>库图姆的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42450/"><img src="/static/imgs/bossweapon/00042450.png"></a></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>金块</td>
-                                                        <td></td>
-                                                    </tr>
+                                        <p>
+                                            <table class="uk-table">
+                                                <tr>
+                                                    <td>各职业最强<b>防御向</b>副手武器的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/10140/"><img src="/static/imgs/bossweapon/2.png" ></a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>库图姆的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42450/"><img src="/static/imgs/bossweapon/00042450.png"></a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>金块</td>
+                                                    <td></td>
+                                                </tr>
 
-                                                </table>
+                                            </table>
 
-                                            </p>
-                                            <br>
-                                            <h3>地点</h3>
-                                            <p>沙漠入口11点钟方向据点<b>赤色石室</b>据点深处的大厅</p>
+                                        </p>
+                                        <br>
+                                        <h3>地点</h3>
+                                        <p>沙漠入口11点钟方向据点<b>赤色石室</b>据点深处的大厅</p>
 
 
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-</div>
-<div id="modalkuza" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                        </div></div>
+                        <div id="modalkuza" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
                             <div class="uk-modal-dialog uk-modal-dialog-blank">
                                 <button class="uk-modal-close uk-close" type="button"></button>
                                 <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
                                     <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/kuzaka.jpg');"></div>
                                     <div class="uk-width-medium-2-5" style="opacity: 0.7">
-                                    <h1>库扎卡</h1>
+                                        <h1>库扎卡</h1>
                                         <br>
                                         <div class="uk-width-medium-2-3">
                                             <h3>由来</h3>
@@ -549,51 +325,49 @@ function float2int(f) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </div></div>
+                            <div id="modalkara" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+                                <div class="uk-modal-dialog uk-modal-dialog-blank">
+                                    <button class="uk-modal-close uk-close" type="button"></button>
+                                    <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+                                        <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/karanda.jpg');"></div>
+                                        <div class="uk-width-medium-2-5" style="opacity: 0.7">
+                                            <h1>卡兰达</h1>
 
-<div id="modalkara" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
-                            <div class="uk-modal-dialog uk-modal-dialog-blank">
-                                <button class="uk-modal-close uk-close" type="button"></button>
-                                <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
-                                    <div class="uk-width-medium-3-5 uk-height-viewport uk-cover-background uk-row-first" style="background-image: url('/static/imgs/bossfigure/karanda.jpg');"></div>
-                                    <div class="uk-width-medium-2-5" style="opacity: 0.7">
-                                    <h1>卡兰达</h1>
-
-                                        <br>
-                                        <div class="uk-width-medium-2-3">
-                                            <h3>由来</h3>
-                                            <p>哈耳庇厄的领主。完全实行集体生活的耳庇厄将族群中最强的雌性选出来做为自己的领主，称为卡兰达。学者推测，选出最强雌性的目的是为了让整个族群只与卡兰达交配产卵，保持族群战斗力。这可能也是族群中的哈耳庇厄向卡兰达保持绝对忠诚的原因</p>
                                             <br>
-                                            <h3>掉落</h3>
+                                            <div class="uk-width-medium-2-3">
+                                                <h3>由来</h3>
+                                                <p>哈耳庇厄的领主。完全实行集体生活的耳庇厄将族群中最强的雌性选出来做为自己的领主，称为卡兰达。学者推测，选出最强雌性的目的是为了让整个族群只与卡兰达交配产卵，保持族群战斗力。这可能也是族群中的哈耳庇厄向卡兰达保持绝对忠诚的原因</p>
+                                                <br>
+                                                <h3>掉落</h3>
 
-                                            <p>
-                                                <table class="uk-table">
-                                                    <tr>
-                                                        <td>各职业最强<b>觉醒武器</b>的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/14782/"><img src="/static/imgs/bossweapon/4.png" ></a></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>卡兰达的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42437/"><img src="/static/imgs/bossweapon/00042437.png"></a></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>金块</td>
-                                                        <td></td>
-                                                    </tr>
+                                                <p>
+                                                    <table class="uk-table">
+                                                        <tr>
+                                                            <td>各职业最强<b>觉醒武器</b>的武器箱子:例如</td><td><a href="http://bddatabase.net/jp/item/14782/"><img src="/static/imgs/bossweapon/4.png" ></a></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>卡兰达的气息(100个气息可换上面的箱子):</td><td><a href="http://bddatabase.net/jp/item/42437/"><img src="/static/imgs/bossweapon/00042437.png"></a></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>金块</td>
+                                                            <td></td>
+                                                        </tr>
 
-                                                </table>
+                                                    </table>
 
-                                            </p>
-                                            <br>
-                                            <h3>地点</h3>
-                                            <p>东西部交界有鸟人的城堡12点钟方向据点<b>卡兰达山脊</b>据点</p>
+                                                </p>
+                                                <br>
+                                                <h3>地点</h3>
+                                                <p>东西部交界有鸟人的城堡12点钟方向据点<b>卡兰达山脊</b>据点</p>
 
 
 
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-</div>
+                                </div></div>
 
+                            </body>
 
-</body>
+                            </html>
