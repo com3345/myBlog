@@ -211,7 +211,7 @@ async def index(*, page='1'):
 
 @get('/manage/')
 def manage():
-    return 'redirect:/manage/comments'
+    return 'redirect:/manage/blogs'
 
 
 @get('/signin')
