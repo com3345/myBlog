@@ -12,7 +12,7 @@ from fabric.api import *
 
 env.user = 'myblog'
 env.sudo_user = 'root'
-env.hosts = ['133.130.112.166']
+env.hosts = ['163.44.113.76']
 
 db_user = 'root'
 db_password = ''
