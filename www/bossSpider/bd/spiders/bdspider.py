@@ -8,14 +8,15 @@ class BdItemSpider(scrapy.Spider):
     name = "bdspider"
 
     start_urls = [
-        "http://6214.teacup.com/blackdesertboss/bbs"
+        "http://6214.teacup.com/blackdesertboss/bbs",
+        # "http://6214.teacup.com/blackdesertboss/bbs?page=2&"
     ]
 
     def parse(self, response):
 
         # <div class="col-lg-10 col-lg-offset-1">
         transtab = str.maketrans("１２３４５６７８９０：", "1234567890:")
-        for post in response.xpath("//div[@class='col-lg-10 col-lg-offset-1']")[2:13]:
+        for post in response.xpath("//div[@class='col-lg-10 col-lg-offset-1']")[2:22]:
             item = BdItem()
             item["title"] = post.xpath(".//a/text()").extract()[0].replace("\u3000", " ").translate(transtab)
             item["content"] = ''.join(post.xpath(".//p/text()").extract()).replace("\u3000", " ").translate(transtab)
