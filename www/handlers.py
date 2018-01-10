@@ -31,7 +31,7 @@ BOSS_CD = {
     "nube": ("努贝尔(ヌーベル)", 9, 4),
     "kutu": ("库图姆(クツム)", 9, 5),
     "kuza": ("库扎卡(クザカ)", 8, 4),
-    "kara": ("卡兰达(カランダ)", 15, 3)
+    "kara": ("卡兰达(カランダ)", 14, 4)
 }
 
 _RE_EMAIL = re.compile(r'[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
@@ -100,7 +100,7 @@ def api_crawl_boss():
         el["last_time"],
         el["last_time"] + timedelta(hours=BOSS_CD[el["boss"]][1]).total_seconds(),
         BOSS_CD[el["boss"]][2]) for el in data]
-    # logging.info({boss[0]: boss[1:] for boss in bosses})
+    logging.info({boss[0]: boss[1:] for boss in bosses})
     return {boss[0]: boss[1:] for boss in bosses}
 
 
