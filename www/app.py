@@ -16,6 +16,7 @@ from jinja2 import Environment, FileSystemLoader
 from aiohttp import web
 
 from handlers import cookie2user, COOKIE_NAME
+from subprocess import run
 
 
 def init_jinja2(app, **kw):
@@ -141,6 +142,7 @@ def datetime_filter(t):
 
 
 async def init(loop):
+    logging.info("App started at {0}".format(datetime.now()))
     await orm.create_pool(loop=loop, user='root', password='', db='myBlog')
     app = web.Application(loop=loop, middlewares=[
         logger_factory, auth_factory, response_factory
@@ -152,6 +154,20 @@ async def init(loop):
     logging.info('server started at http://127.0.0.1:9000')
     return srv
 
+async def run_spider():
+    while True:
+        logging.info('Spider start crawling at {0}'.format(datetime.now()))
+
+        if os.path.exists("/static/presentcodes.json"):
+            logging.info("file exsited")
+            run("rm presentcodes.json", shell=True)
+
+        run("scrapy crawl presentcodespider -o ../static/presentcodes.json", shell=True, cwd="./presentcodeSpider")
+        logging.info('Spider ended crawling at {0}'.format(datetime.now()))
+        logging.info(codes)
+        await asyncio.sleep(25)
+
 loop = asyncio.get_event_loop()
+# tasks = [init(loop)]
 loop.run_until_complete(init(loop))
 loop.run_forever()
